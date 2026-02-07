@@ -92,6 +92,17 @@
 <li class="nav-item">
 <a class="nav-link" href="/{{app.user ? 'logout':'login'}}">{{app.user ? 'logout':'login'}}</a>
 </li>
+<li class="nav-item">
+    <a class="nav-link position-relative" href="{{ path('app_cart_index') }}">
+        <i class="fas fa-shopping-cart"></i>
+
+        <!-- Compteur du panier -->
+        <span id="cart-count"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            0
+        </span>
+    </a>
+</li>
 
 </ul>
 </div>
@@ -216,6 +227,17 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 <script src="{{ asset('lib/owlcarousel/owl.carousel.min.js') }}"></script>
 
 <script src="{{ asset('jss/main.js') }}"></script>
+<script>
+function loadCartCount() {
+    fetch("{{ path('app_cart_data') }}")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("cart-count").innerText = data.totalItems;
+        });
+}
+
+document.addEventListener("DOMContentLoaded", loadCartCount);
+</script>
 
 </body>
 

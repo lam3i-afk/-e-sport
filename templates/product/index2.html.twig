@@ -71,6 +71,7 @@
         border: none;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        position: relative;
     }
 
     .gaming-card-white:hover {
@@ -114,12 +115,101 @@
         padding: 8px 20px;
         font-weight: 600;
         transition: 0.3s;
+        cursor: pointer;
     }
 
     .btn-buy:hover {
         filter: brightness(1.2);
         box-shadow: 0 0 15px var(--g-purple);
         color: white;
+        transform: scale(1.05);
+    }
+
+    .btn-buy:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-buy.loading {
+        background: linear-gradient(45deg, #666, #999);
+    }
+
+    .btn-buy.success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+    }
+
+    /* Cart Badge in Navbar */
+    .gaming-nav-cart {
+        position: relative;
+        font-size: 22px;
+        color: #444;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -10px;
+        background: #ff0000;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* Success Notification */
+    .success-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .out-of-stock {
+        background: #6c757d !important;
+        cursor: not-allowed !important;
     }
 </style>
 
@@ -132,14 +222,13 @@
             </div>
             <div class="col-md-6 text-md-end">
                <div class="input-group w-75 ms-auto">
-    <form method="get" action="{{ path('app_product_index2') }}" class="d-flex w-100">
-        <input type="text" name="search" value="{{ searchTerm|default('') }}" class="form-control bg-dark text-white border-0" placeholder="Search gear...">
-        <button class="btn btn-primary border-0" style="background: var(--g-cream);">
-            <i class="fas fa-search"></i>
-        </button>
-    </form>
-</div>
-
+                    <form method="get" action="{{ path('app_product_index2') }}" class="d-flex w-100">
+                        <input type="text" name="search" value="{{ searchTerm|default('') }}" class="form-control bg-dark text-white border-0" placeholder="Search gear...">
+                        <button class="btn btn-primary border-0" style="background: var(--g-cream);">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -165,15 +254,38 @@
                     {% for product in products %}
                         <div class="col-md-6 col-xl-4">
                             <div class="gaming-card-white h-100 p-3">
-                                <img src="{{ product.image }}" class="img-fluid rounded-4" alt="{{ product.name }}">
-                                <div class="text-center">
-                                    <h4>{{ product.name }}</h4>
-                                    <p>{{ product.description }}</p>
-                                    <p><strong>Category:</strong> {{ product.category.name }}</p>
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <span class="price-text">{{ product.price }} TND</span>
-                                        <a href="#" class="btn-buy">ADD</a>
+                                <!-- Product Link (Image & Info) -->
+                                <a href="{{ path('app_product_show', {id: product.id}) }}" class="text-decoration-none">
+                                    <img src="{{ product.image }}" class="img-fluid rounded-4" alt="{{ product.name }}">
+                                    <div class="text-center">
+                                        <h4>{{ product.name }}</h4>
+                                        <p>{{ product.description|length > 80 ? product.description|slice(0, 80) ~ '...' : product.description }}</p>
+                                        <p><strong>Category:</strong> {{ product.category.name }}</p>
                                     </div>
+                                </a>
+
+                                <!-- Price and Add to Cart (NOT in link) -->
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="price-text">{{ product.price }} TND</span>
+                                    
+                                    {% if app.user %}
+                                        {% if product.stock > 0 %}
+                                            <button class="btn-buy add-to-cart-btn" 
+                                                    data-product-id="{{ product.id }}"
+                                                    data-product-name="{{ product.name }}"
+                                                    data-product-price="{{ product.price }}">
+                                                <i class="fas fa-shopping-cart"></i> ADD
+                                            </button>
+                                        {% else %}
+                                            <span class="btn-buy out-of-stock">
+                                                <i class="fas fa-times-circle"></i> OUT
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <a href="{{ path('app_login') }}" class="btn-buy text-decoration-none">
+                                            <i class="fas fa-sign-in-alt"></i> LOGIN
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -185,5 +297,119 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript for Add to Cart -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Handle Add to Cart button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-to-cart-btn') || 
+            e.target.closest('.add-to-cart-btn')) {
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const button = e.target.classList.contains('add-to-cart-btn') 
+                ? e.target 
+                : e.target.closest('.add-to-cart-btn');
+            
+            const productId = button.getAttribute('data-product-id');
+            const productName = button.getAttribute('data-product-name');
+            const productPrice = button.getAttribute('data-product-price');
+            
+            // Disable button and show loading state
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.classList.add('loading');
+            
+            // Send AJAX request
+            fetch('/cart/add/' + productId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart badge
+                    updateCartBadge(data.cartTotal);
+                    
+                    // Show success state
+                    button.innerHTML = '<i class="fas fa-check"></i> ADDED';
+                    button.classList.remove('loading');
+                    button.classList.add('success');
+                    
+                    // Show notification
+                    showNotification('Added to Cart!', productName + ' has been added to your cart');
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.remove('success');
+                        button.disabled = false;
+                    }, 2000);
+                    
+                } else {
+                    alert('Error: ' + data.message);
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                button.innerHTML = originalHTML;
+                button.classList.remove('loading');
+                button.disabled = false;
+            });
+        }
+    });
+    
+    // Update cart badge
+    function updateCartBadge(total) {
+        let badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.innerText = total;
+            // Animate
+            badge.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                badge.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }
+    
+    // Show success notification
+    function showNotification(title, message) {
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.innerHTML = `
+            <strong><i class="fas fa-check-circle me-2"></i>${title}</strong><br>
+            <small>${message}</small>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+    }
+    
+    // Load cart count on page load
+    fetch('/cart/data')
+        .then(response => response.json())
+        .then(data => {
+            updateCartBadge(data.totalItems);
+        })
+        .catch(error => console.error('Error loading cart data:', error));
+});
+</script>
 
 {% endblock %}

@@ -1,42 +1,459 @@
+{# templates/product/show.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Product{% endblock %}
+{% block title %}{{ product.name }} - e-sports.tn{% endblock %}
 
 {% block body %}
-    <h1>Product</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ product.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ product.name }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ product.description }}</td>
-            </tr>
-            <tr>
-                <th>Price</th>
-                <td>{{ product.price }}</td>
-            </tr>
-            <tr>
-                <th>Stock</th>
-                <td>{{ product.stock }}</td>
-            </tr>
-            <tr>
-                <th>Image</th>
-                <td>{{ product.image }}</td>
-            </tr>
-        </tbody>
-    </table>
+<!-- breadcrumb start-->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb_iner text-center">
+                    <div class="breadcrumb_iner_item">
+                        <h2>{{ product.name }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-    <a href="{{ path('app_product_index') }}">back to list</a>
+<!-- Product Details Section -->
+<div class="container-fluid product-details-wrapper py-5" style="background:#fdfdfd;">
+    <div class="container">
+        <nav class="mb-4">
+            <ol class="breadcrumb" style="background:transparent;">
+                <li class="breadcrumb-item"><a href="{{ path('app_product_index') }}" style="color:#054397;">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_product_index') }}" style="color:#054397;">Products</a></li>
+                <li class="breadcrumb-item active text-dark">{{ product.name }}</li>
+            </ol>
+        </nav>
 
-    <a href="{{ path('app_product_edit', {'id': product.id}) }}">edit</a>
+        <section class="pdp-section">
+            <div class="row g-4 align-items-center">
+                <!-- Images -->
+                <div class="col-lg-6 text-center">
+                    <div class="pdp-main-image">
+                        <img src="{{ asset(product.image) }}" id="pdp-hero" alt="{{ product.name }}">
+                    </div>
 
-    {{ include('product/_delete_form.html.twig') }}
+                    {% if product.images is defined and product.images|length > 0 %}
+                        <div class="d-flex gap-2 justify-content-center mt-3">
+                            {% for img in product.images %}
+                                <div class="thumb-link {% if loop.first %}active{% endif %}" onclick="updatePDPImage(this)">
+                                    <img src="{{ asset(img) }}" class="img-fluid">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-lg-6">
+                    <p class="pdp-category mb-1">{{ product.category.name }}</p>
+                    <h2 class="pdp-title mb-2">{{ product.name }}</h2>
+                    <h3 class="pdp-price mb-3">{{ product.price }} TND</h3>
+                    <p class="text-muted mb-4" style="font-size:0.9rem;line-height:1.4;">{{ product.description }}</p>
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="pdp-qty-selector">
+                            <button class="btn btn-link text-dark p-0" onclick="changePdpQty(-1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="px-3 fw-bold" id="pdp-count">1</span>
+                            <button class="btn btn-link text-dark p-0" onclick="changePdpQty(1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        {% if product.stock > 0 %}
+                            <span class="text-danger fw-bold small">
+                                <i class="fas fa-bolt me-1"></i> ONLY {{ product.stock }} LEFT IN STOCK
+                            </span>
+                        {% else %}
+                            <span class="text-danger fw-bold small">
+                                <i class="fas fa-times-circle me-1"></i> OUT OF STOCK
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 mb-4">
+                        {% if app.user %}
+                            {% if product.stock > 0 %}
+                                <button class="pdp-btn-primary flex-grow-1" 
+                                        id="add-to-cart-btn"
+                                        data-product-id="{{ product.id }}"
+                                        data-product-name="{{ product.name }}"
+                                        data-max-stock="{{ product.stock }}">
+                                    <i class="fas fa-shopping-cart me-2"></i>ADD TO CART
+                                </button>
+                            {% else %}
+                                <button class="pdp-btn-primary flex-grow-1" disabled style="background:#6c757d;">
+                                    <i class="fas fa-times-circle me-2"></i>OUT OF STOCK
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="pdp-btn-primary flex-grow-1 text-center text-decoration-none">
+                                <i class="fas fa-sign-in-alt me-2"></i>LOGIN TO PURCHASE
+                            </a>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-dark px-3" style="border-radius:12px;">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="row text-center text-md-start g-3">
+                            <div class="col-md-4">
+                                <i class="fas fa-truck mb-1" style="color:#054397;"></i>
+                                <p class="small mb-0 fw-bold">Free Shipping</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-undo mb-1" style="color:#a52bf9;"></i>
+                                <p class="small mb-0 fw-bold">30-Day Returns</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-shield-alt mb-1" style="color:#ff0000;"></i>
+                                <p class="small mb-0 fw-bold">2-Year Warranty</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+{# CSS Styles #}
+<style>
+.pdp-main-image { 
+    background: transparent !important; 
+    border-radius: 0; 
+    padding: 0; 
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px; 
+}
+
+.pdp-main-image img { 
+    max-width: 100%; 
+    max-height: 450px; 
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15)); 
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.thumb-link { 
+    width: 70px; 
+    height: 70px; 
+    border: 1px solid #eee; 
+    border-radius: 10px; 
+    background: transparent !important; 
+    padding: 5px; 
+    cursor: pointer; 
+    transition: .3s; 
+}
+
+.thumb-link img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.thumb-link.active { 
+    border-color: #054397; 
+    transform: translateY(-3px);
+}
+
+.pdp-category { 
+    color: #a52bf9; 
+    font-weight: 600; 
+    letter-spacing: 1px; 
+    font-size: .75rem; 
+    margin-bottom: .2rem; 
+}
+
+.pdp-title { 
+    font-weight: 800; 
+    font-size: 2.2rem; 
+    margin-bottom: .5rem; 
+    color: #1a1a1a;
+}
+
+.pdp-price { 
+    font-weight: 800; 
+    font-size: 1.8rem; 
+    margin-bottom: 1rem; 
+    color: #054397; 
+}
+
+.pdp-qty-selector { 
+    display: inline-flex; 
+    align-items: center; 
+    background: #f1f1f1; 
+    border-radius: 10px; 
+    padding: 5px 15px; 
+}
+
+.pdp-qty-selector button { 
+    background: none; 
+    border: none; 
+    font-weight: 700; 
+    font-size: 1.1rem; 
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.pdp-qty-selector button:hover {
+    color: #054397;
+}
+
+.pdp-btn-primary { 
+    background: #054397; 
+    color: #fff; 
+    border: none; 
+    padding: 15px 40px; 
+    border-radius: 10px; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    transition: .3s; 
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.pdp-btn-primary:hover { 
+    background: #002f6c; 
+    box-shadow: 0 10px 20px rgba(5, 67, 151, 0.2);
+}
+
+.pdp-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pdp-btn-primary.loading {
+    background: #6c757d;
+}
+
+.pdp-btn-primary.success {
+    background: #28a745;
+}
+
+/* Cart Badge */
+.gaming-nav-cart {
+    position: relative;
+    font-size: 22px;
+    color: #444;
+    text-decoration: none;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #ff0000;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+}
+
+/* Success Notification */
+.success-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    font-size: 1rem;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+</style>
+
+{# JavaScript #}
+<script>
+// Image gallery functionality
+function updatePDPImage(thumb) {
+    const mainImg = document.getElementById('pdp-hero');
+    const newSrc = thumb.getElementsByTagName('img')[0].src;
+    mainImg.style.opacity = '0';
+    setTimeout(() => {
+        mainImg.src = newSrc;
+        mainImg.style.opacity = '1';
+    }, 200);
+    document.querySelectorAll('.thumb-link').forEach(el => el.classList.remove('active'));
+    thumb.classList.add('active');
+}
+
+// Quantity selector
+function changePdpQty(amount) {
+    const countEl = document.getElementById('pdp-count');
+    const maxStock = {{ product.stock }};
+    let current = parseInt(countEl.innerText);
+    let newQty = current + amount;
+    
+    if (newQty >= 1 && newQty <= maxStock) {
+        countEl.innerText = newQty;
+    } else if (newQty > maxStock) {
+        alert('Maximum stock available: ' + maxStock);
+    }
+}
+
+// Add to Cart functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const productName = this.getAttribute('data-product-name');
+            const maxStock = parseInt(this.getAttribute('data-max-stock'));
+            const quantity = parseInt(document.getElementById('pdp-count').innerText);
+            
+            // Validate quantity
+            if (quantity > maxStock) {
+                alert('Only ' + maxStock + ' items available in stock');
+                return;
+            }
+            
+            // Disable button
+            const button = this;
+            button.disabled = true;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>ADDING...';
+            button.classList.add('loading');
+            
+            // Send AJAX request
+            fetch('/cart/add/' + productId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart badge
+                    updateCartBadge(data.cartTotal);
+                    
+                    // Show success
+                    button.innerHTML = '<i class="fas fa-check me-2"></i>ADDED TO CART!';
+                    button.classList.remove('loading');
+                    button.classList.add('success');
+                    
+                    // Show notification
+                    showNotification(
+                        'Added to Cart!', 
+                        quantity + 'x ' + productName + ' added successfully'
+                    );
+                    
+                    // Reset button after 3 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.remove('success');
+                        button.disabled = false;
+                        // Reset quantity to 1
+                        document.getElementById('pdp-count').innerText = '1';
+                    }, 3000);
+                    
+                } else {
+                    alert('Error: ' + data.message);
+                    button.innerHTML = originalHTML;
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                button.innerHTML = originalHTML;
+                button.classList.remove('loading');
+                button.disabled = false;
+            });
+        });
+    }
+    
+    // Update cart badge
+    function updateCartBadge(total) {
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.innerText = total;
+            badge.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                badge.style.transform = 'scale(1)';
+            }, 300);
+        }
+    }
+    
+    // Show notification
+    function showNotification(title, message) {
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-3" style="font-size:24px;"></i>
+                <div>
+                    <strong>${title}</strong><br>
+                    <small>${message}</small>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 4000);
+    }
+    
+    // Load cart count on page load
+    fetch('/cart/data')
+        .then(response => response.json())
+        .then(data => {
+            updateCartBadge(data.totalItems);
+        })
+        .catch(error => console.error('Error loading cart:', error));
+});
+</script>
+
 {% endblock %}

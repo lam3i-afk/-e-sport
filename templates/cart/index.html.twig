@@ -1,0 +1,427 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Panier - Gaming Store{% endblock %}
+
+{% block body %}
+
+
+<!-- breadcrumb start-->
+<section class="breadcrumb breadcrumb_bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb_iner text-center">
+                    <div class="breadcrumb_iner_item">
+                        <h2>Shopping Cart</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cart Section -->
+<div class="container py-5 cart-section-modern">
+    {% if items|length == 0 %}
+        <!-- Empty Cart -->
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-shopping-cart" style="font-size: 80px; color: #ccc;"></i>
+                <h3 class="mt-4">Your cart is empty</h3>
+                <p class="text-muted">Add some gaming gear to get started!</p>
+                <a href="{{ path('app_product_index2') }}" class="btn btn-primary mt-3">Continue Shopping</a>
+            </div>
+        </div>
+    {% else %}
+        <!-- Cart with Products -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                {% for item in items %}
+                <div class="cart-row d-flex align-items-center justify-content-between" data-item-id="{{ item.id }}">
+                    <div class="d-flex align-items-center">
+                        <!-- Product Image -->
+                        <div class="cart-img-box me-4">
+                          <img src="{{ item.product.image }}" alt="{{ item.product.name }}">
+
+                        </div>
+                        
+                        <!-- Product Details -->
+                        <div class="cart-item-details">
+                            <h5 class="fw-bold mb-1">{{ item.product.name }}</h5>
+                            <p class="mb-0 text-muted small">{{ item.product.category.name }}</p>
+                            <div class="cart-actions mt-3">
+                                <i class="far fa-trash-alt text-danger cursor-pointer remove-item" data-item-id="{{ item.id }}"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price and Quantity -->
+                    <div class="text-end">
+                        <h5 class="fw-bold mb-3 item-price" data-unit-price="{{ item.product.price }}">
+                            ${{ item.subtotal|number_format(2, '.', ',') }}
+                        </h5>
+                        <div class="modern-qty">
+                            <button class="qty-btn-mod minus-btn" data-item-id="{{ item.id }}">−</button>
+                            <span class="qty-count mx-2">{{ item.quantity }}</span>
+                            <button class="qty-btn-mod plus-btn" data-item-id="{{ item.id }}" data-max-stock="{{ item.product.stock }}">+</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4 summary-column">
+                <div class="order-summary-box shadow-sm">
+                    <h4 class="fw-bold mb-4">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-bold" id="cart-subtotal">${{ total|number_format(2, '.', ',') }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4 mt-3">
+                        <span class="fw-bold h5 mb-0">Total</span>
+                        <span class="fw-bold h5 mb-0" id="cart-total">${{ total|number_format(2, '.', ',') }}</span>
+                    </div>
+                    <button class="checkout-black-btn" onclick="window.location.href='{{ path('app_checkout') }}'">Checkout</button>
+
+                    <button class="btn btn-outline-danger w-100 mt-2" id="clear-cart-btn">Clear Cart</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- CSS Styles -->
+<style>
+/* --- Navbar & Cart Icon --- */
+/* --- Cart Layout --- */
+.cart-section-modern { 
+    background-color: #000000;
+    padding: 40px 0;
+    margin-top: 0;
+    color: #ffffff; /* Add text color for all content */
+}
+
+.cart-row {
+    background: #1a1a1a; /* Darker background for rows */
+    border: 1px solid #333333;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    color: #ffffff; /* White text for rows */
+}
+
+.cart-img-box {
+    width: 120px;
+    height: 120px;
+    background: #2a2a2a; /* Darker background for image box */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.cart-img-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* --- Summary Box --- */
+.summary-column {
+    margin-top: 0;
+}
+
+.order-summary-box {
+    background: #1a1a1a; /* Dark background for summary */
+    border-radius: 16px;
+    border: 1px solid #333333;
+    padding: 25px;
+    position: sticky;
+    top: 20px;
+    color: #ffffff; /* White text for summary */
+}
+
+/* --- Text Colors --- */
+.cart-item-details {
+    flex: 1;
+    min-width: 0;
+    padding: 0 15px;
+    color: #ffffff; /* White text */
+}
+
+.cart-item-details h5 {
+    color: #ffffff; /* White for product name */
+}
+
+.cart-item-details p.text-muted {
+    color: #aaaaaa !important; /* Lighter gray for category */
+}
+
+.item-price {
+    color: #ffffff !important; /* White for price */
+}
+
+/* --- Quantity Controls --- */
+.modern-qty {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #444444;
+    border-radius: 25px;
+    padding: 5px 15px;
+    background: #2a2a2a;
+}
+
+.qty-btn-mod {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #ffffff; /* White buttons */
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn-mod:hover { 
+    color: #054397; 
+}
+
+.qty-count {
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+    color: #ffffff; /* White quantity number */
+}
+
+/* --- Order Summary Text --- */
+.order-summary-box .text-muted {
+    color: #aaaaaa !important; /* Lighter gray for labels */
+}
+
+.order-summary-box .fw-bold {
+    color: #ffffff !important; /* White for amounts */
+}
+
+/* --- Buttons --- */
+.checkout-black-btn {
+    background: #000;
+    color: #fff;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    margin-top: 20px;
+    cursor: pointer;
+    border: 1px solid #444;
+}
+
+.checkout-black-btn:hover {
+    background: #333;
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* --- Icons --- */
+.remove-item {
+    color: #ff6b6b !important; /* Red color for trash icon */
+}
+
+.remove-item:hover {
+    color: #ff0000 !important;
+}
+
+/* --- Responsive Fixes --- */
+@media (max-width: 992px) {
+    .summary-column {
+        margin-top: 40px;
+    }
+    
+    .cart-row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .cart-row > div:first-child {
+        margin-bottom: 20px;
+    }
+    
+    .cart-img-box {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .cart-img-box {
+        width: 100px;
+        height: 100px;
+    }
+}
+</style>
+
+<!-- JavaScript for Dynamic Cart -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Function to update UI
+    function updateCartUI(data) {
+        if (data.cartTotal !== undefined) {
+            document.getElementById('cart-subtotal').innerText = '$' + data.cartTotal.toFixed(2);
+            document.getElementById('cart-total').innerText = '$' + data.cartTotal.toFixed(2);
+        }
+        if (data.totalItems !== undefined) {
+            document.getElementById('cart-badge').innerText = data.totalItems;
+        }
+    }
+
+    // Plus Button (+)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('plus-btn')) {
+            const itemId = e.target.getAttribute('data-item-id');
+            const maxStock = parseInt(e.target.getAttribute('data-max-stock'));
+            const qtySpan = e.target.closest('.cart-row').querySelector('.qty-count');
+            const currentQty = parseInt(qtySpan.innerText);
+
+            if (currentQty >= maxStock) {
+                alert('Maximum stock reached!');
+                return;
+            }
+
+            const newQty = currentQty + 1;
+
+            fetch('{{ path('app_cart_update', {id: '__ID__'}) }}'.replace('__ID__', itemId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: newQty })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    qtySpan.innerText = newQty;
+                    const priceElement = e.target.closest('.cart-row').querySelector('.item-price');
+                    priceElement.innerText = '$' + data.itemSubtotal.toFixed(2);
+                    updateCartUI(data);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // Minus Button (-)
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('minus-btn')) {
+            const itemId = e.target.getAttribute('data-item-id');
+            const qtySpan = e.target.closest('.cart-row').querySelector('.qty-count');
+            const currentQty = parseInt(qtySpan.innerText);
+
+            if (currentQty <= 1) {
+                if (confirm('Remove this item from cart?')) {
+                    removeItem(itemId, e.target.closest('.cart-row'));
+                }
+                return;
+            }
+
+            const newQty = currentQty - 1;
+
+            fetch('{{ path('app_cart_update', {id: '__ID__'}) }}'.replace('__ID__', itemId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity: newQty })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    qtySpan.innerText = newQty;
+                    const priceElement = e.target.closest('.cart-row').querySelector('.item-price');
+                    priceElement.innerText = '$' + data.itemSubtotal.toFixed(2);
+                    updateCartUI(data);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // Remove Item
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item')) {
+            if (confirm('Are you sure you want to remove this item?')) {
+                const itemId = e.target.getAttribute('data-item-id');
+                const cartRow = e.target.closest('.cart-row');
+                removeItem(itemId, cartRow);
+            }
+        }
+    });
+
+    function removeItem(itemId, cartRow) {
+        fetch('{{ path('app_cart_remove', {id: '__ID__'}) }}'.replace('__ID__', itemId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cartRow.remove();
+                updateCartUI(data);
+                
+                // Reload if cart is empty
+                if (data.totalItems === 0) {
+                    location.reload();
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Clear Cart Button
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear your entire cart?')) {
+                fetch('{{ path('app_cart_clear') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
