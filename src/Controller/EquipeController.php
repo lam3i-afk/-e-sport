@@ -132,4 +132,15 @@ final class EquipeController extends AbstractController
             'memberCount' => $equipe->getMembers()->count(),
         ]);
     }
+    #[Route('/{id}/join', name: 'app_equipe_join', methods: ['GET'])]
+    public function join(Equipe $equipe, EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser(); 
+        if (!$equipe->getMembers()->contains($user)) {
+            $equipe->addMember($user);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_equipe_show', ['id' => $equipe->getId()]);
+    }
 }

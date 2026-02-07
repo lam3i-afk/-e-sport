@@ -25,10 +25,22 @@
     .btn-join{background:var(--accent);color:#052e16}.btn-join:hover{background:#16a34a}
 </style>
 
+<<<<<<< HEAD
 <div class="container">
     <h1 class="page-title">🏆 Teams</h1>
 
     <div class="teams-grid">
+=======
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>actionss</th>
+            </tr>
+        </thead>
+        <tbody>
+>>>>>>> 9eab78729dd86b66264bb1db6345d414f242b452
         {% for equipe in equipes %}
             {% include 'equipe/card.html.twig' with { equipe: equipe } %}
         {% endfor %}
