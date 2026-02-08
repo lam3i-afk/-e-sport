@@ -1,0 +1,267 @@
+{# templates/tournoi/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Tournois - e-Sports{% endblock %}
+
+{% block body %}
+<section class="tournaments-list">
+    <div class="container">
+        <div class="section-header">
+            <h1>Tous les Tournois</h1>
+            <p>Rejoignez les meilleurs compétiteurs</p>
+        </div>
+
+        <form class="filters" method="get" action="{{ path('app_tournoi_index') }}">
+            <input type="text" name="q" placeholder="Rechercher un tournoi..." class="search-input" value="{{ searchTerm|default('') }}">
+
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="" {{ currentStatus is empty ? 'selected' : '' }}>Tous les statuts</option>
+                <option value="En attente" {{ currentStatus == 'En attente' ? 'selected' : '' }}>En attente</option>
+                <option value="En cours" {{ currentStatus == 'En cours' ? 'selected' : '' }}>En cours</option>
+                <option value="terminé" {{ currentStatus == 'terminé' ? 'selected' : '' }}>Terminé</option>
+            </select>
+
+            <select name="type" class="filter-select" onchange="this.form.submit()">
+                <option value="" {{ currentType is empty ? 'selected' : '' }}>Tous les types</option>
+                <option value="solo" {{ currentType == 'solo' ? 'selected' : '' }}>Solo</option>
+                <option value="equipe" {{ currentType == 'equipe' ? 'selected' : '' }}>Équipe</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </form>
+
+        <div class="tournaments-list-container">
+            {% for tournoi in tournois %}
+                <div class="tournament-item">
+                    <div class="tournament-left">
+                        <h3>{{ tournoi.nom }}</h3>
+                        <p class="game-name">{{ tournoi.jeu ? tournoi.jeu.nom : '—' }}</p>
+                        <p class="dates">
+                            <i class="icon">📅</i>
+                            {{ tournoi.dateDebut|date('d M Y') }} - {{ tournoi.dateFin|date('d M Y') }}
+                        </p>
+                    </div>
+                    <div class="tournament-middle">
+                        <div class="info-box">
+                            <span class="label">Participants</span>
+                            <span class="value">{{ tournoi.participants ? tournoi.participants|length : 0 }}/{{ tournoi.maxParticipants ?: '—' }}</span>
+                        </div>
+                        <div class="info-box">
+                            <span class="label">Cagnotte</span>
+                            <span class="value">0€</span>
+                        </div>
+                    </div>
+                    <div class="tournament-right">
+                        <span class="status status-{{ tournoi.statut }}">{{ tournoi.statut }}</span>
+                        <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn-details">S'inscrire</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .tournaments-list {
+        background: linear-gradient(135deg, #0f0c29, #302b63);
+        padding: 60px 20px;
+        min-height: 100vh;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+        color: white;
+    }
+
+    .section-header h1 {
+        font-size: 3em;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-header p {
+        font-size: 1.2em;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .filters {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+
+    .search-input, .filter-select {
+        padding: 12px 20px;
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-size: 1em;
+    }
+
+    .search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus, .filter-select:focus {
+        outline: none;
+        border-color: #ff006e;
+        box-shadow: 0 0 15px rgba(255, 0, 110, 0.3);
+    }
+
+    .tournaments-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .tournament-item {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr 1fr;
+        gap: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        transition: all 0.3s ease;
+        align-items: center;
+    }
+
+    .tournament-item:hover {
+        transform: translateX(10px);
+        border-color: #ff006e;
+        background: rgba(255, 0, 110, 0.05);
+        box-shadow: 0 15px 35px rgba(255, 0, 110, 0.2);
+    }
+
+    .tournament-left h3 {
+        font-size: 1.4em;
+        margin: 0 0 10px 0;
+    }
+
+    .game-name {
+        color: #ff006e;
+        margin: 5px 0 15px 0;
+        font-weight: bold;
+    }
+
+    .dates {
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
+
+    .tournament-middle {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+    }
+
+    .info-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .label {
+        display: block;
+        font-size: 0.85em;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 5px;
+    }
+
+    .value {
+        display: block;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #ff006e;
+    }
+
+    .tournament-right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+
+    .status-en_attente {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .status-en_cours {
+        background: rgba(33, 150, 243, 0.2);
+        color: #2196f3;
+    }
+
+    .status-terminé {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+    }
+
+    .btn-details {
+        background: linear-gradient(135deg, #ff006e, #8338ec);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 20px;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+
+    .btn-details:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 0, 110, 0.3);
+    }
+
+    @media (max-width: 1024px) {
+        .tournament-item {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .tournament-middle {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .tournament-right {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .section-header h1 {
+            font-size: 2em;
+        }
+
+        .filters {
+            flex-direction: column;
+        }
+
+        .search-input, .filter-select {
+            width: 100%;
+        }
+
+        .tournament-middle {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
