@@ -1,0 +1,47 @@
+{# templates/equipe/card.html.twig #}
+
+<div class="team-card">
+
+    <!-- Glow background -->
+    <div class="team-glow"></div>
+
+    <!-- Header -->
+    <div class="team-header">
+        <span class="team-number">#{{ loop.index }}</span>
+    </div>
+
+    <!-- Avatar -->
+    <div class="team-avatar">
+        <i class="fas fa-gamepad"></i>
+    </div>
+
+    <!-- Name -->
+    <h2 class="team-name">{{ equipe.nom }}</h2>
+
+    <!-- Meta badge -->
+    <div class="team-meta">
+        <span class="team-badge">ESPORT TEAM</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="team-actions">
+
+        <button type="button"
+                class="btn btn-view"
+                onclick="openModal('modal-{{ equipe.id }}')">
+            <i class="fas fa-eye"></i>
+            View
+        </button>
+
+        <a href="{{ path('app_equipe_join', {id: equipe.id}) }}"
+           class="btn btn-join">
+            <i class="fas fa-users"></i>
+            Join Team
+        </a>
+
+    </div>
+
+</div>
+
+
+

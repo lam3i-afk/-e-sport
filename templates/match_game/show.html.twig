@@ -1,0 +1,391 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ match_game.equipe1.nom }} vs {{ match_game.equipe2.nom }} - Match Center{% endblock %}
+
+{% block body %}
+<style>
+/* =========================
+   GLOBAL THEME
+=========================*/
+:root {
+    --bg: #020617;
+    --card: rgba(15, 23, 42, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --primary: #3b82f6;
+    --accent: #ec4899;
+    --glow: rgba(59, 130, 246, 0.5);
+}
+
+body {
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+/* =========================
+   MATCH HEADER
+=========================*/
+.match-header {
+    text-align: center;
+    margin-bottom: 60px;
+    position: relative;
+}
+
+.match-header::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(59, 130, 246, 0.15), transparent 70%);
+    filter: blur(60px);
+    z-index: -1;
+}
+
+.match-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tournament-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* =========================
+   VS DISPLAY
+=========================*/
+.vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 70px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 5;
+}
+
+.team-block {
+    text-align: center;
+    flex: 1;
+    min-width: 250px;
+}
+
+.team-avatar-lg {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    margin: 0 auto 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    position: relative;
+    transition: transform 0.4s ease;
+}
+
+.team-avatar-lg:hover {
+    transform: scale(1.05);
+}
+
+.team-avatar-lg::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), transparent);
+    z-index: -1;
+    opacity: 0.6;
+}
+
+.team-name-lg {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.vs-divider {
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--muted);
+    opacity: 0.2;
+    font-style: italic;
+    transform: skew(-10deg);
+}
+
+.score-board {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    padding: 25px 50px;
+    border-radius: 24px;
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 5px;
+    box-shadow: 0 0 50px rgba(59, 130, 246, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.score-board::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--primary));
+}
+
+/* =========================
+   DETAILS GRID
+=========================*/
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
+}
+
+.detail-card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    padding: 30px;
+    border-radius: 24px;
+    transition: transform 0.3s ease;
+}
+
+.detail-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.detail-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.detail-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.status-finished { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.status-progress { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.status-pending { background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
+
+/* =========================
+   ACTIONS
+=========================*/
+.actions-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #2563eb);
+    color: #fff;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+}
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 35px -5px rgba(59, 130, 246, 0.5);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .vs-container { flex-direction: column; gap: 30px; }
+    .vs-divider { display: none; }
+    .score-board { width: 100%; justify-content: space-around; }
+}
+</style>
+
+<div class="page-container">
+    
+    <div class="match-header">
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+            <span class="tournament-badge">{{ match_game.tournoi.nom }}</span>
+            {% if match_game.tournoi.jeu %}
+                <span class="tournament-badge" style="color:var(--primary); border-color:rgba(59,130,246,0.3);">
+                    <i class="fas fa-gamepad"></i> {{ match_game.tournoi.jeu.nom }}
+                </span>
+            {% endif %}
+        </div>
+        <h1 class="match-title">Match Overview</h1>
+    </div>
+
+    <!-- VS DISPLAY -->
+    <div class="vs-container">
+        <!-- Team 1 -->
+        <div class="team-block">
+            <div class="team-avatar-lg">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <div class="team-name-lg">{{ match_game.equipe1.nom }}</div>
+        </div>
+
+        <!-- Score or VS -->
+        {% if match_game.statut == 'Finished' or match_game.statut == 'In Progress' %}
+             <div class="score-board">
+                <span>{{ match_game.scoreTeam1 }}</span>
+                <span style="opacity:0.3">:</span>
+                <span>{{ match_game.scoreTeam2 }}</span>
+             </div>
+        {% else %}
+            <div class="vs-divider">VS</div>
+        {% endif %}
+
+        <!-- Team 2 -->
+        <div class="team-block">
+            <div class="team-avatar-lg" style="--primary: var(--accent)"> <!-- Override color for variation -->
+                <i class="fas fa-headset"></i>
+            </div>
+            <div class="team-name-lg">{{ match_game.equipe2.nom }}</div>
+        </div>
+    </div>
+
+    <!-- DETAILS GRID -->
+    <div class="details-grid">
+        <!-- Status -->
+        <div class="detail-card">
+            <span class="detail-label">Status</span>
+            <div class="detail-value">
+                {% if match_game.statut == 'Finished' %}
+                    <span class="status-badge status-finished">Finished</span>
+                {% elseif match_game.statut == 'In Progress' %}
+                    <span class="status-badge status-progress">In Progress</span>
+                {% else %}
+                    <span class="status-badge status-pending">Pending</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Date -->
+        <div class="detail-card">
+            <span class="detail-label">Date & Time</span>
+            <div class="detail-value">
+                <i class="far fa-calendar-alt" style="margin-right:8px; opacity:0.6"></i>
+                {{ match_game.dateMatch|date('d M Y') }}
+                <small style="opacity:0.6; margin-left:8px">{{ match_game.dateMatch|date('H:i') }}</small>
+            </div>
+        </div>
+
+        <!-- Match ID -->
+        <div class="detail-card">
+            <span class="detail-label">Match ID</span>
+            <div class="detail-value">#{{ match_game.id }}</div>
+        </div>
+
+        {% if match_game.tournoi.jeu %}
+        <!-- Game Info -->
+        <div class="detail-card">
+            <span class="detail-label">Game Platform</span>
+            <div class="detail-value">
+                {{ match_game.tournoi.jeu.plateforme ?? 'PC' }}
+                <span style="font-size:0.9rem; color:var(--muted); display:block; margin-top:5px;">
+                    {{ match_game.tournoi.jeu.genre ?? 'Esports' }}
+                </span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions-bar">
+        <a href="{{ path('app_match_game_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+
+        <a href="{{ path('app_match_game_edit', {'id': match_game.id}) }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Match
+        </a>
+
+        {{ include('match_game/_delete_form.html.twig') }}
+    </div>
+
+</div>
+{% endblock %}

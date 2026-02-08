@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Match - Match Center{% endblock %}
+
+{% block body %}
+<style>
+/* =========================
+   GLOBAL THEME
+=========================*/
+:root {
+    --bg: #020617;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --primary: #3b82f6;
+    --card: rgba(15, 23, 42, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+.page-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.page-subtitle {
+    color: var(--muted);
+    font-size: 1.1rem;
+}
+</style>
+
+<div class="page-container">
+    
+    <div class="page-header">
+        <h1 class="page-title">Create Match</h1>
+        <p class="page-subtitle">Schedule a new competitive matchup</p>
+    </div>
+
+    <!-- Main Form -->
+    {{ include('match_game/_form.html.twig', {'button_label': 'Create Match'}) }}
+
+</div>
+{% endblock %}

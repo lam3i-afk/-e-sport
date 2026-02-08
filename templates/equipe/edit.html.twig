@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Team{% endblock %}
+
+{% block body %}
+<style>
+    /* Reuse styles from new.html.twig via internal style block or ensure consistency */
+    .form-page-container {
+        min-height: 100vh;
+        padding: 60px 20px;
+        background: radial-gradient(circle at 0% 50%, rgba(59, 130, 246, 0.1), transparent 50%),
+                    radial-gradient(circle at 100% 0%, rgba(236, 72, 153, 0.1), transparent 50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-title {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        font-weight: 900;
+        margin-bottom: 10px;
+        background: linear-gradient(to right, #ffffff, #cbd5e1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .form-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
+        padding: 40px;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        margin-bottom: 30px;
+    }
+
+    .danger-zone {
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .danger-title {
+        color: #ef4444;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+</style>
+
+<div class="form-page-container">
+    <div class="form-header">
+        <h1 class="form-title">Edit Team Details</h1>
+    </div>
+
+    <div class="form-card">
+        {{ include('equipe/_form.html.twig', {'button_label': 'Update Team'}) }}
+    </div>
+
+    <div class="form-card danger-zone">
+        <h3 class="danger-title"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+        {{ include('equipe/_delete_form.html.twig') }}
+    </div>
+</div>
+{% endblock %}
