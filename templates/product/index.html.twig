@@ -191,24 +191,32 @@
             {% endif %}
         </div>
     </nav>
- <div class="container-fluid">
+   <div class="container-fluid">
         <div class="row">
             <div class="col-lg-2 col-md-3 d-none d-md-block sidebar">
-                <div class="sidebar-header"><h6>Navigation</h6></div>
+                <div class="sidebar-header">
+                    <h6>Navigation</h6>
+                </div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link {{ app.request.get('_route') == 'admin_dashboard' ? 'active' : '' }}" href="{{ path('admin_dashboard') }}">
-                            <i class="fas fa-chart-line"></i> Dashboard
+                        <a class="nav-link {{ app.request.get('_route') == 'admin_dashboard' ? 'active' : '' }}" 
+                           href="{{ path('admin_dashboard') }}">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'admin_user' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('admin_user_index') }}">
-                            <i class="fas fa-users"></i> Users
+                        <a class="nav-link {{ 'admin_user' in app.request.get('_route') ? 'active' : '' }}" 
+                           href="{{ path('admin_user_index') }}">
+                            <i class="fas fa-users"></i>
+                            <span>Users</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'app_product_index' in app.request.get('_route') ? 'active' : '' }}" href="{{ path('app_product_index') }}">
-                            <i class="fas fa-box"></i> Products
+                
+                   <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_product_index') }}">
+                            <i class="fas fa-store"></i>
+                            <span>Products</span>
                         </a>
                     </li>
 
@@ -220,12 +228,42 @@
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_match_game_index2') }}">
-                            <i class="fas fa-users"></i> Match_games
+                        <a class="nav-link" href= "{{ path('app_match_game_index2') }}"> >
+                            <i class="fas fa-users"></i>
+                            <span> Match_games</span>
                         </a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_blog_index') }}">
+                            <i class="fas fa-trophy"></i>
+                            <span>Blogs</span>
+                        </a>
+                    </li>
+                                         <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_comment_index') }}">
+                            <i class="fas fa-comment"></i>
+                            <span>Comments</span>
+                        </a>
+                    </li>
+
+                    
+                    <div class="sidebar-header mt-4">
+                        <h6>System</h6>
+                    </div>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-cog"></i>
+                            <span>logout</span>
+                        </a>
+                    </li>
+                    
                 </ul>
             </div>
+
+            
+        </div>
+    </div>
 
             <main class="col-lg-10 col-md-9 ms-sm-auto main-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
