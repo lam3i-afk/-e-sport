@@ -14,10 +14,18 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/match/game')]
 final class MatchGameController extends AbstractController
 {
-    #[Route(name: 'app_match_game_index', methods: ['GET'])]
+ #[Route("/getall" ,name: 'app_match_game_index', methods: ['GET'])]
     public function index(MatchGameRepository $matchGameRepository): Response
     {
         return $this->render('match_game/index.html.twig', [
+            'match_games' => $matchGameRepository->findAll(),
+        ]);
+    }
+
+        #[Route("/dashboard" ,name: 'app_match_game_index2', methods: ['GET'])]
+    public function index2(MatchGameRepository $matchGameRepository): Response
+    {
+        return $this->render('match_game/MatchDashbored.html.twig', [
             'match_games' => $matchGameRepository->findAll(),
         ]);
     }

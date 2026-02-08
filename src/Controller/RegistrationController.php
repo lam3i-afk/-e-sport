@@ -30,7 +30,7 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
             // ✅ Role-based redirection
-            if ($user->getRole() === 'ADMIN') {
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
                 return $this->redirectToRoute('admin_dashboard'); // your admin dashboard route
             }
 

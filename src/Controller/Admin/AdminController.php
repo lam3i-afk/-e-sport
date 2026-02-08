@@ -14,10 +14,14 @@ class AdminController extends AbstractController
     public function index(EntityManagerInterface $em): Response
     {
         // Get all users from the database
-        $users = $em->getRepository(User::class)->findAll();
+        // $users = $em->getRepository(User::class)->findAll();
 
         return $this->render('admin/dashboard.html.twig', [
-            'users' => $users
+            // 'users' => $users
         ]);
     }
 }
+
+
+
+
