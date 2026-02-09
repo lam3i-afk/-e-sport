@@ -15,22 +15,15 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/blog')]
 final class BlogController extends AbstractController
 {
-    #[Route(name: 'app_blog_index', methods: ['GET'])]
+    #[Route(name: 'app_blog_user_index', methods: ['GET'])]
     public function index(BlogRepository $blogRepository): Response
     {
-        return $this->render('blog/index.html.twig', [
+        return $this->render('blog/indexuser.html.twig', [
             'blogs' => $blogRepository->findAll(),
         ]);
     }
 
-    #[Route('/blogs', name: 'app_blog_user_index', methods: ['GET'])]
-    public function indexUser(BlogRepository $blogRepository): Response
-    {
-        $blogs = $blogRepository->findAll();
-        return $this->render('blog/indexuser.html.twig', [
-            'blogs' => $blogs,
-        ]);
-    }
+  
 
     #[Route('/new', name: 'app_blog_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response

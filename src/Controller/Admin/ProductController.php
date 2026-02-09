@@ -1,0 +1,147 @@
+<?php
+
+namespace App\Controller\Admin;
+
+use App\Entity\Product;
+use App\Form\ProductType;
+use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/admin/products')]
+class ProductController extends AbstractController
+{
+    /**
+     * Display all products
+     */
+    #[Route('/', name: 'admin_product_index', methods: ['GET'])]
+    public function index(ProductRepository $productRepository, Request $request): Response
+    {
+        $searchQuery = $request->query->get('q', '');
+
+        if ($searchQuery) {
+            $products = $productRepository->search($searchQuery);
+        } else {
+            $products = $productRepository->findAll();
+        }
+
+        return $this->render('product/admin/index.html.twig', [
+            'products' => $products,
+            'search_query' => $searchQuery,
+            'total_products' => count($products),
+        ]);
+    }
+
+    /**
+     * Export products to CSV
+     */
+    #[Route('/export/csv', name: 'admin_product_export_csv', methods: ['GET'])]
+    public function exportCsv(ProductRepository $productRepository, Request $request): Response
+    {
+        $searchQuery = $request->query->get('q', '');
+        if ($searchQuery) {
+            $products = $productRepository->search($searchQuery);
+        } else {
+            $products = $productRepository->findAllOrdered();
+        }
+
+        $csvData = "ID,Name,Price,CreatedAt\n";
+        foreach ($products as $p) {
+            $csvData .= sprintf("%d,%s,%s,%s\n",
+                $p->getId(),
+                str_replace(',', ' ', $p->getName() ?? ''),
+                $p->getPrice() ?? '',
+                $p->getCreatedAt() ? $p->getCreatedAt()->format('Y-m-d H:i:s') : ''
+            );
+        }
+
+        $response = new Response($csvData);
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="products-' . date('Y-m-d') . '.csv"');
+
+        return $response;
+    }
+
+    /**
+     * Create new product
+     */
+    #[Route('/new', name: 'admin_product_new', methods: ['GET', 'POST'])]
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $product = new Product();
+        $form = $this->createForm(ProductType::class, $product);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($product);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Product created successfully');
+            return $this->redirectToRoute('admin_product_index');
+        }
+
+        return $this->render('product/admin/new.html.twig', [
+            'product' => $product,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * Show product details
+     */
+    #[Route('/{id}', name: 'admin_product_show', methods: ['GET'])]
+    public function show(Product $product): Response
+    {
+        return $this->render('product/admin/show.html.twig', [
+            'product' => $product,
+        ]);
+    }
+
+    /**
+     * Edit product
+     */
+    #[Route('/{id}/edit', name: 'admin_product_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        Product $product,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $form = $this->createForm(ProductType::class, $product);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Product updated successfully');
+            return $this->redirectToRoute('admin_product_index');
+        }
+
+        return $this->render('product/admin/edit.html.twig', [
+            'product' => $product,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * Delete product
+     */
+    #[Route('/{id}', name: 'admin_product_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        Product $product,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid('delete' . $product->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($product);
+            $entityManager->flush();
+            $this->addFlash('success', 'Product deleted successfully');
+        }
+
+        return $this->redirectToRoute('admin_product_index');
+    }
+}

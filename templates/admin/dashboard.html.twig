@@ -455,33 +455,33 @@
                     </li>
                 
                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_product_index') }}">
+                        <a class="nav-link" href="{{ path('admin_product_index') }}">
                             <i class="fas fa-store"></i>
                             <span>Products</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_category_index') }}">
+                        <a class="nav-link" href="{{ path('admin_category_index') }}">
                             <i class="fas fa-trophy"></i>
                             <span>Categories</span>
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href= "{{ path('app_match_game_index2') }}"> >
+                        <a class="nav-link" href="{{ path('admin_match_game_index') }}">
                             <i class="fas fa-users"></i>
-                            <span> Match_games</span>
+                            <span>Match_games</span>
                         </a>
                     </li>
                      <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_blog_index') }}">
+                        <a class="nav-link" href="{{ path('admin_blog_index') }}">
                             <i class="fas fa-trophy"></i>
                             <span>Blogs</span>
                         </a>
                     </li>
                                          <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_comment_index') }}">
+                        <a class="nav-link" href="{{ path('admin_comment_index') }}">
                             <i class="fas fa-comment"></i>
                             <span>Comments</span>
                         </a>
@@ -502,6 +502,9 @@
                 </ul>
             </div>
 
+            <div class="col-lg-10 col-md-9 main-content">
+                {% block admin_content %}{% endblock %}
+            </div>
             
         </div>
     </div>

@@ -8,6 +8,7 @@ use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CommentType extends AbstractType
@@ -16,8 +17,10 @@ class CommentType extends AbstractType
     {
         $builder
             ->add('content')
-            ->add('createdAt', null, [
+            ->add('createdAt', DateTimeType::class, [
                 'widget' => 'single_text',
+                'required' => false,
+                'input' => 'datetime_immutable',
             ])
             ->add('blog', EntityType::class, [
                 'class' => Blog::class,

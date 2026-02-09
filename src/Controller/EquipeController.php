@@ -50,7 +50,7 @@ final class EquipeController extends AbstractController
             $entityManager->persist($equipe);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_equipe_index');
+            return $this->redirectToRoute('app_equipe_created', ['id' => $equipe->getId()]);
         }
 
         return $this->render('equipe/new.html.twig', [
@@ -59,7 +59,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_equipe_show', methods: ['GET'])]
+    #[Route('/{id<\d+>}', name: 'app_equipe_show', methods: ['GET'])]
     public function show(Equipe $equipe): Response
     {
         return $this->render('equipe/show.html.twig', [
@@ -67,7 +67,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_equipe_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id<\d+>}/edit', name: 'app_equipe_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Equipe $equipe, EntityManagerInterface $entityManager): Response
     {
         // seul owner peut modifier
@@ -89,7 +89,7 @@ final class EquipeController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_equipe_delete', methods: ['POST'])]
+    #[Route('/{id<\d+>}', name: 'app_equipe_delete', methods: ['POST'])]
     public function delete(Request $request, Equipe $equipe, EntityManagerInterface $entityManager): Response
     {
         // seul owner peut supprimer
@@ -105,7 +105,7 @@ final class EquipeController extends AbstractController
         return $this->redirectToRoute('app_equipe_index');
     }
 
-    #[Route('/{id}/join', name: 'app_equipe_join', methods: ['GET'])]
+    #[Route('/{id<\d+>}/join', name: 'app_equipe_join', methods: ['GET'])]
     public function join(Equipe $equipe, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -118,7 +118,7 @@ final class EquipeController extends AbstractController
         return $this->redirectToRoute('app_equipe_index', ['id' => $equipe->getId()]);
     }
 
-    #[Route('/{id}/json', name: 'app_equipe_json', methods: ['GET'])]
+    #[Route('/{id<\d+>}/json', name: 'app_equipe_json', methods: ['GET'])]
     public function getJson(Equipe $equipe): JsonResponse
     {
         $tournaments = [];
@@ -134,6 +134,100 @@ final class EquipeController extends AbstractController
             'memberCount' => $equipe->getMembers()->count(),
             'maxMembers' => $equipe->getMaxMembers(),
 
+        ]);
+    }
+    #[Route('/{id<\d+>}/created', name: 'app_equipe_created', methods: ['GET'])]
+    public function created($id, EntityManagerInterface $entityManager): Response
+    {
+        $equipe = $entityManager->getRepository(Equipe::class)->find($id);
+        if (!$equipe) {
+            return $this->redirectToRoute('app_equipe_index');
+        }
+
+        // Render the "team created" onboarding page
+        return $this->render('equipe/created.html.twig', [
+            'team' => $equipe,
+        ]);
+    }
+    #[Route('/{id<\d+>}/dashboard', name: 'app_equipe_dashboard', methods: ['GET'])]
+    public function dashboard($id, EntityManagerInterface $entityManager): Response
+    {
+        $equipe = $entityManager->getRepository(Equipe::class)->find($id);
+        if (!$equipe) {
+            return $this->redirectToRoute('app_equipe_index');
+        }
+        $user = $this->getUser();
+
+        // Ensure requesting user is a member
+        $isMember = false;
+        if ($user) {
+            $isMember = $equipe->getMembers()->contains($user);
+        }
+
+        if (!$isMember) {
+            // Owner is implicitly a member, double-check
+            if ($equipe->getOwner() !== $user) {
+                throw $this->createAccessDeniedException();
+            }
+        }
+
+        $role = ($equipe->getOwner() === $user) ? 'LEADER' : 'MEMBER';
+        $membership = ['role' => $role];
+
+        return $this->render('equipe/dashboard.html.twig', [
+            'team' => $equipe,
+            'membership' => $membership,
+        ]);
+    }
+    #[Route('/{id<\d+>}/invite', name: 'app_equipe_invite', methods: ['GET','POST'])]
+    public function invite($id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $equipe = $entityManager->getRepository(Equipe::class)->find($id);
+        if (!$equipe) {
+            return $this->redirectToRoute('app_equipe_index');
+        }
+
+        // Placeholder invitations list (replace with real invite entity/service later)
+        $invitations = [
+            ['email' => 'rajhiaziz@gmail.com', 'status' => 'pending'],
+            ['email' => 'player2@gmail.com', 'status' => 'accepted'],
+        ];
+
+        // If form submitted (simple demo), you could handle sending invite here.
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            if ($email) {
+                // Persist invite or send email (not implemented)
+                $invitations[] = ['email' => $email, 'status' => 'pending'];
+            }
+        }
+
+        return $this->render('equipe/invite.html.twig', [
+            'equipe' => $equipe,
+            'invitations' => $invitations,
+        ]);
+    }
+    #[Route('/my-teams', name: 'app_my_teams', methods: ['GET'])]
+    public function myTeams(EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+
+        $ownedTeams = $entityManager->getRepository(Equipe::class)->findBy(['owner' => $user]);
+
+        $qb = $entityManager->createQueryBuilder();
+        $qb->select('e')
+            ->from(Equipe::class, 'e')
+            ->join('e.members', 'm')
+            ->where('m = :user')
+            ->setParameter('user', $user);
+        $joinedTeams = $qb->getQuery()->getResult();
+
+        $total = count($ownedTeams) + count($joinedTeams);
+
+        return $this->render('equipe/my-teams.html.twig', [
+            'ownedTeams' => $ownedTeams,
+            'joinedTeams' => $joinedTeams,
+            'totalTeams' => $total,
         ]);
     }
     #[Route('/user/{id}/owner', name: 'app_equipe_by_owner', methods: ['GET'])]

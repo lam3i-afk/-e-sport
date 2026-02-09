@@ -1,0 +1,26 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Create New Match - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">Create New Match</h1>
+            <p class="page-subtitle">Add a new match game to the system</p>
+        </div>
+        <a href="{{ path('admin_match_game_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back to Matches
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Match Information</h5>
+    </div>
+    <div class="card-body">
+        {{ include('match_game/admin/_form.html.twig') }}
+    </div>
+</div>
+{% endblock %}

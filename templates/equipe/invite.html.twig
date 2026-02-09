@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+{% block title %}Invite Players{% endblock %}
+
+{% block body %}
+<div class="invite-page">
+
+    <h1>Invite Players</h1>
+    <p class="subtitle">Build your roster and dominate the game</p>
+
+    <form class="invite-form" method="post" action="{{ path('app_equipe_invite', {'id': equipe.id}) }}">
+        <input type="email" name="email" placeholder="player@email.com" required>
+        <button type="submit">Send Invite</button>
+    </form>
+
+    <section class="invite-list">
+        <h2>Invitations</h2>
+
+        {% for inv in invitations %}
+            <div class="invite-card {{ inv.status == 'accepted' ? 'accepted' : '' }}">
+                <span>{{ inv.email }}</span>
+                <em class="{{ inv.status == 'pending' ? 'pending' : '' }}">{{ inv.status|capitalize }}</em>
+                {% if inv.status == 'pending' %}
+                    <form method="post" action="#" style="display:inline">
+                        <button class="cancel" type="button">Cancel</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Aucune invitation envoyée.</p>
+        {% endfor %}
+
+    </section>
+
+</div>
+{% endblock %}
+

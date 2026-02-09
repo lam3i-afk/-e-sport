@@ -1,0 +1,224 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Products - Admin{% endblock %}
+
+{% block admin_content %}
+<style>
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        z-index: -1;
+    }
+
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .label {
+        color: #94a3b8;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .table {
+        color: #e2e8f0;
+    }
+
+    .table thead th {
+        font-weight: 600;
+        border-bottom: 2px solid rgba(148, 163, 184, 0.1);
+        color: #cbd5e1;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        transition: background 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: rgba(148, 163, 184, 0.1);
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .action-btn:hover {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--primary);
+    }
+
+    .action-btn.view:hover {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+    }
+
+    .action-btn.edit:hover {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+    }
+
+    .action-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+    }
+
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .badge-finished {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .badge-in-progress {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+</style>
+ 
+
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">Products Management</h1>
+        </div>
+        <a href="{{ path('admin_product_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>New Product
+        </a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="number">{{ total_users|default(0) }}</div>
+                <div class="label">Total Users</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="number">{{ total_products|default(0) }}</div>
+                <div class="label">Total Products</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="number">{{ products|filter(p => p.stock > 0)|length }}</div>
+                <div class="label">In Stock</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="number">{{ products|filter(p => p.stock <= 0)|length }}</div>
+                <div class="label">Out of Stock</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="number">
+                    {{ products|map(p => p.price)|default([]) | reduce((acc, v) => acc + v, 0) / (products|length > 0 ? products|length : 1) | number_format(2, '.', ',') }}
+                </div>
+                <div class="label">Avg Price</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Users</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline">
+                <i class="fas fa-filter me-2"></i>Filter
+            </button>
+            <a href="{{ path('admin_user_export_csv') }}" class="btn btn-outline">
+                <i class="fas fa-download me-2"></i>Export
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>category</th>
+                        <th>price</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>#{{ product.id }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category ? product.category.name : '' }}</td>
+                            <td>{{ product.price ? product.price|number_format(2, '.', ',') ~ ' €' : '' }}</td>
+                            <td class="text-end">
+                                <a href="{{ path('admin_product_show', {'id': product.id}) }}" class="action-btn view" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_product_edit', {'id': product.id}) }}" class="action-btn edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_product_delete', {'id': product.id}) }}" class="d-inline" onsubmit="return confirm('Delete this product?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                    <button type="submit" class="action-btn delete" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">No products found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

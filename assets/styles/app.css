@@ -142,3 +142,346 @@
         margin-bottom: 3rem;
     }
 }
+
+/* ===== Invite page styles ===== */
+.invite-page {
+    min-height: 100vh;
+    padding: 80px 12%;
+    background: radial-gradient(circle at top, #020617, #0f172a);
+    color: #e5e7eb;
+}
+
+.invite-page h1 {
+    font-size: 2.8rem;
+    background: linear-gradient(90deg, #38bdf8, #a855f7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.subtitle {
+    opacity: .7;
+    margin-bottom: 40px;
+}
+
+.invite-form {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 60px;
+}
+
+.invite-form input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 14px;
+    background: rgba(15,23,42,.7);
+    border: 1px solid rgba(148,163,184,.2);
+    color: white;
+}
+
+.invite-form button {
+    padding: 14px 30px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    background: linear-gradient(90deg,#6366f1,#3b82f6);
+    color: white;
+    cursor: pointer;
+}
+
+.invite-list h2 {
+    margin-bottom: 20px;
+}
+
+.invite-card {
+    background: rgba(15,23,42,.65);
+    border-radius: 16px;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border: 1px solid rgba(148,163,184,.15);
+}
+
+.invite-card em.pending {
+    color: #facc15;
+}
+
+.invite-card.accepted em {
+    color: #22c55e;
+}
+
+.invite-card button.cancel {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+}
+
+/* ===== Settings page styles ===== */
+.settings-page {
+    min-height: 100vh;
+    padding: 80px 12%;
+    background: radial-gradient(circle at top, #020617, #020617);
+    color: #e5e7eb;
+}
+
+.settings-page h1 {
+    font-size: 2.8rem;
+    background: linear-gradient(90deg,#f472b6,#a855f7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.settings-card {
+    max-width: 600px;
+    background: rgba(15,23,42,.7);
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid rgba(148,163,184,.2);
+    margin-top: 50px;
+}
+
+.settings-card label {
+    display: block;
+    margin-top: 25px;
+    margin-bottom: 8px;
+    opacity: .8;
+}
+
+.settings-card input,
+.settings-card select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(2,6,23,.8);
+    border: 1px solid rgba(148,163,184,.2);
+    color: white;
+}
+
+.settings-card button {
+    margin-top: 40px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    background: linear-gradient(90deg,#22c55e,#16a34a);
+    color: white;
+}
+
+.danger {
+    margin-top: 60px;
+    max-width: 600px;
+}
+
+.danger h2 {
+    color: #ef4444;
+}
+
+.danger .delete {
+    margin-top: 20px;
+    background: none;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 14px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+/* ===== My Teams styles ===== */
+.my-teams-page {
+    min-height: 100vh;
+    padding: 70px 10%;
+    background: radial-gradient(circle at top, #020617, #0f172a);
+    color: #e5e7eb;
+}
+
+.my-teams-page h1 {
+    font-size: 3rem;
+    margin-bottom: 40px;
+    background: linear-gradient(90deg,#38bdf8,#a855f7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 25px;
+    margin-bottom: 60px;
+}
+
+.stat-card {
+    background: rgba(15,23,42,.7);
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid rgba(148,163,184,.2);
+    backdrop-filter: blur(12px);
+    transition: .3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 35px rgba(56,189,248,.25);
+}
+
+.stat-card span {
+    font-size: 1.8rem;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    margin: 10px 0;
+}
+
+.team-section {
+    margin-bottom: 60px;
+}
+
+.team-section h2 {
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+    gap: 25px;
+}
+
+.team-card {
+    background: rgba(15,23,42,.65);
+    border-radius: 20px;
+    padding: 30px;
+    text-decoration: none;
+    color: white;
+    border: 1px solid rgba(148,163,184,.2);
+    backdrop-filter: blur(12px);
+    transition: .3s;
+}
+
+.team-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 40px rgba(59,130,246,.3);
+}
+
+.team-card.leader {
+    border: 1px solid rgba(168,85,247,.4);
+    box-shadow: 0 0 30px rgba(168,85,247,.2);
+}
+
+.team-top {
+    margin-bottom: 15px;
+}
+
+.badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: .8rem;
+    background: linear-gradient(90deg,#a855f7,#6366f1);
+}
+
+.badge.player {
+    background: linear-gradient(90deg,#38bdf8,#3b82f6);
+}
+
+/* ===== Team dashboard styles ===== */
+.team-dashboard {
+    padding: 70px 10%;
+    min-height: 100vh;
+    background: radial-gradient(circle at top,#020617,#0f172a);
+    color: #e5e7eb;
+}
+
+.team-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.team-header h1 {
+    font-size: 2.8rem;
+    background: linear-gradient(90deg,#38bdf8,#a855f7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.role {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: .8rem;
+    background: #3b82f6;
+}
+
+.role.LEADER {
+    background: linear-gradient(90deg,#a855f7,#6366f1);
+}
+
+.team-actions a {
+    margin-left: 15px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    background: linear-gradient(90deg,#22c55e,#16a34a);
+    color: white;
+}
+
+.team-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+    gap: 25px;
+    margin-bottom: 60px;
+}
+
+.stat {
+    background: rgba(15,23,42,.7);
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    border: 1px solid rgba(148,163,184,.2);
+}
+
+.stat h3 {
+    font-size: 2rem;
+}
+
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+    gap: 20px;
+}
+
+.member-card {
+    background: rgba(15,23,42,.7);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    background: #1e293b;
+    border-radius: 50%;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+.team-tournaments {
+    margin-top: 60px;
+}
+
+.tournament-card {
+    background: rgba(15,23,42,.7);
+    padding: 25px;
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+
+

@@ -17,7 +17,6 @@ class BlogType extends AbstractType
             ->add('createdAt', null, [
                 'widget' => 'single_text',
             ])
-            ->add('category')
       
         ;
     }

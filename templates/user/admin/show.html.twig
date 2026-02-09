@@ -1,0 +1,223 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Match Details - Admin{% endblock %}
+
+{% block admin_content %}
+<style>
+    .match-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .match-title h1 {
+        margin: 0;
+        color: #fff;
+    }
+
+    .match-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .match-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .teams-card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: var(--radius);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .team-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .team-score {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .vs-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1rem;
+        color: #94a3b8;
+    }
+
+    .match-details {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+    }
+
+    .match-details h5 {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .status-badge.finished {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--success);
+    }
+
+    .status-badge.in-progress {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+    }
+
+    .status-badge.pending {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--warning);
+    }
+
+    @media (max-width: 768px) {
+        .match-content {
+            grid-template-columns: 1fr;
+        }
+
+        .match-header {
+            flex-direction: column;
+        }
+
+        .match-actions {
+            width: 100%;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .match-actions a,
+        .match-actions button {
+            flex: 1;
+            min-width: 120px;
+        }
+    }
+</style>
+<div class="match-header">
+    <div class="match-title">
+        <h1 class="page-title">Match Details</h1>
+        <p class="page-subtitle">View complete match information</p>
+    </div>
+    <div class="match-actions">
+        <a href="{{ path('admin_match_game_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="match-content">
+    <div class="teams-card">
+        <div class="team-name">{{ user.nom }}</div>
+        <div class="team-score">{{ user.email }}</div>
+    </div>
+
+    <div class="teams-card">
+        <div class="team-name">Roles</div>
+        <div class="team-score">{{ user.roles ? user.roles|join(', ') : '—' }}</div>
+    </div>
+</div>
+
+<div class="match-details">
+    <h5><i class="fas fa-info-circle me-2"></i>User Information</h5>
+    
+    <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ user.email }}</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">User ID</span>
+        <span class="detail-value">#{{ user.id }}</span>
+    </div>
+
+    <div class="detail-row">
+        <span class="detail-label">Role</span>
+        <span class="detail-value">{{ user.role ?: '' }}</span>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_user_edit', {'id': user.id}) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit User
+            </a>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>Delete User
+            </button>
+            <a href="{{ path('admin_user_index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Users
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                <h5 class="modal-title" style="color: #fff;">Delete User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: #e2e8f0;">
+                <p>Are you sure you want to delete user <strong>{{ user.nom }}</strong>?</p>
+                <p style="color: #94a3b8; font-size: 0.875rem;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(148, 163, 184, 0.1);">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ path('admin_user_delete', {'id': user.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Team Created{% endblock %}
+
+{% block body %}
+<style>
+.team-created {
+    min-height: 100vh;
+    padding: 80px 10%;
+    background: radial-gradient(circle at top, #1e293b, #020617);
+    color: #e5e7eb;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.badge-success {
+    display: inline-block;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 3.2rem;
+    background: linear-gradient(90deg, #a855f7, #38bdf8);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+    margin-bottom: 70px;
+}
+
+.action-card {
+    background: rgba(15, 23, 42, 0.65);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.25);
+}
+
+.action-card span {
+    font-size: 2rem;
+}
+
+.action-card a {
+    display: inline-block;
+    margin-top: 20px;
+    color: #38bdf8;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.progress h2 {
+    margin-bottom: 20px;
+}
+
+.progress ul {
+    list-style: none;
+    padding: 0;
+}
+
+.progress li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    opacity: .6;
+}
+
+.progress li.done {
+    color: #22c55e;
+    opacity: 1;
+}
+
+.cta {
+    margin-top: 60px;
+    text-align: center;
+}
+
+.cta a {
+    background: linear-gradient(90deg, #6366f1, #3b82f6);
+    padding: 16px 36px;
+    border-radius: 999px;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+}
+</style>
+
+<div class="team-created">
+
+    <section class="hero">
+        <div class="badge-success">✔ Team Created</div>
+        <h1>{{ team.nom }}</h1>
+        <p>Your squad is ready. Lead them to victory.</p>
+    </section>
+
+    <section class="actions">
+        <div class="action-card">
+            <span>👥</span>
+            <h3>Invite Players</h3>
+            <p>Recruit members to complete your roster</p>
+            <a href="/equipe/{{ team.id }}/invite">Invite / Manage</a>
+        </div>
+
+        <div class="action-card">
+            <span>⚙️</span>
+            <h3>Team Settings</h3>
+            <p>Logo, privacy, roles</p>
+            <a href="{{ path('app_equipe_edit', {id: team.id}) }}">Configure</a>
+        </div>
+
+        <div class="action-card">
+            <span>🏆</span>
+            <h3>Join Tournament</h3>
+            <p>Register your team in competitions</p>
+            <a href="{{ path('app_tournoi_index') }}">Explore</a>
+        </div>
+    </section>
+
+    <section class="progress">
+        <h2>Setup Progress</h2>
+        <ul>
+            <li class="{{ team.nom ? 'done' : '' }}">Team created</li>
+            <li class="{{ team.getMaxMembers() > team.members|length ? '' : 'done' }}">Invite players</li>
+            <li>Select main game</li>
+            <li>Join first tournament</li>
+        </ul>
+    </section>
+
+    <div class="cta">
+        <a href="{{ path('app_equipe_dashboard', {id: team.id}) }}">
+            Go to Team Dashboard →
+        </a>
+    </div>
+
+</div>
+{% endblock %}
+

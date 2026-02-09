@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+{% block title %}Team Dashboard{% endblock %}
+
+{% block body %}
+<div class="team-dashboard">
+
+    <!-- HEADER -->
+    <section class="team-header">
+        <div>
+            <h1>{{ team.nom }}</h1>
+            <span class="role {{ membership.role }}">
+                {{ membership.role }}
+            </span>
+        </div>
+
+        <div class="team-actions">
+            {% if membership.role == 'LEADER' %}
+                <a href="{{ path('app_equipe_invite', {id: team.id}) }}">Invite</a>
+                <a href="{{ path('app_equipe_edit', {id: team.id}) }}">Settings</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="team-stats">
+        <div class="stat">
+            <h3>{{ team.members|length }}</h3>
+            <p>Members</p>
+        </div>
+        <div class="stat">
+            <h3>28</h3>
+            <p>Matches</p>
+        </div>
+        <div class="stat">
+            <h3>17</h3>
+            <p>Wins</p>
+        </div>
+        <div class="stat">
+            <h3>61%</h3>
+            <p>Win rate</p>
+        </div>
+    </section>
+
+    <!-- MEMBERS -->
+    <section class="team-members">
+        <h2>Members</h2>
+
+        <div class="members-grid">
+            {% for member in team.members %}
+                <div class="member-card">
+                    <div class="avatar"></div>
+                    <p>{{ member.nom ?: member.userIdentifier }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- TOURNAMENTS -->
+    <section class="team-tournaments">
+        <h2>Tournaments</h2>
+
+        <div class="tournament-card">
+            <h3>Spring Cup</h3>
+            <p>Status : Active</p>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+

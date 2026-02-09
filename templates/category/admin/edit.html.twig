@@ -1,0 +1,33 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Edit Category - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">Edit Category</h1>
+            <p class="page-subtitle">Update category information</p>
+        </div>
+        <a href="{{ path('admin_category_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back to Categories
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Category Information</h5>
+    </div>
+    <div class="card-body">
+        {{ include('category/admin/_form.html.twig') }}
+    </div>
+</div>
+
+<div class="danger-zone">
+    <div class="danger-title">
+        <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
+    </div>
+    {{ include('category/admin/_delete_form.html.twig') }}
+</div>
+{% endblock %}

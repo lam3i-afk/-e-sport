@@ -26,8 +26,7 @@ class Blog
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $category = null;
+    // removed category field
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $imageName = null;
@@ -52,8 +51,7 @@ class Blog
     public function setContent(string $content): self { $this->content = $content; return $this; }
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
     public function setCreatedAt(\DateTimeImmutable $createdAt): self { $this->createdAt = $createdAt; return $this; }
-    public function getCategory(): ?string { return $this->category; }
-    public function setCategory(?string $category): self { $this->category = $category; return $this; }
+    // category removed
     public function getImageName(): ?string { return $this->imageName; }
     public function setImageName(?string $imageName): self { $this->imageName = $imageName; return $this; }
     public function getCommentCount(): ?int { return $this->commentCount; }
