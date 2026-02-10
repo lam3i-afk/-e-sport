@@ -14,11 +14,104 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/match/game')]
 final class MatchGameController extends AbstractController
 {
- #[Route("/", name: 'app_match_game_index', methods: ['GET'])]
+    #[Route('/tournoi/{tournoiId}', name: 'app_match_game_by_tournoi', methods: ['GET'])]
+    public function byTournoi(int $tournoiId, MatchGameRepository $matchGameRepository, \App\Repository\TournoiRepository $tournoiRepository): Response
+    {
+        $tournoi = $tournoiRepository->findOneWithJeu($tournoiId);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi introuvable.');
+        }
+        $matchGames = $matchGameRepository->findByTournoi($tournoi);
+        $equipesInscrites = $tournoiRepository->getEquipesInscrites($tournoi);
+        $classement = $this->computeClassement($matchGames, $equipesInscrites);
+        return $this->render('match_game/index.html.twig', [
+            'match_games' => $matchGames,
+            'tournoi' => $tournoi,
+            'classement' => $classement,
+        ]);
+    }
+
+    /**
+     * Calcule le classement : toutes les équipes inscrites au tournoi, avec les stats des matchs terminés (ou 0).
+     * @param array<MatchGame> $matchGames
+     * @param array<\App\Entity\Equipe> $equipesInscrites
+     * @return array<int, array{equipe: \App\Entity\Equipe, rang: int, mj: int, v: int, n: int, p: int, bp: int, bc: int, diff: int, pts: int}>
+     */
+    private function computeClassement(array $matchGames, array $equipesInscrites): array
+    {
+        $stats = [];
+        foreach ($equipesInscrites as $equipe) {
+            $id = $equipe->getId();
+            $stats[$id] = ['equipe' => $equipe, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+        }
+        foreach ($matchGames as $m) {
+            if (strtolower((string) $m->getStatut()) !== 'finished') {
+                continue;
+            }
+            $eq1 = $m->getEquipe1();
+            $eq2 = $m->getEquipe2();
+            if (!$eq1 || !$eq2) {
+                continue;
+            }
+            $id1 = $eq1->getId();
+            $id2 = $eq2->getId();
+            if (!isset($stats[$id1])) {
+                $stats[$id1] = ['equipe' => $eq1, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+            }
+            if (!isset($stats[$id2])) {
+                $stats[$id2] = ['equipe' => $eq2, 'mj' => 0, 'v' => 0, 'n' => 0, 'p' => 0, 'bp' => 0, 'bc' => 0];
+            }
+            $s1 = $m->getScoreTeam1() ?? 0;
+            $s2 = $m->getScoreTeam2() ?? 0;
+            $stats[$id1]['mj']++;
+            $stats[$id2]['mj']++;
+            $stats[$id1]['bp'] += $s1;
+            $stats[$id1]['bc'] += $s2;
+            $stats[$id2]['bp'] += $s2;
+            $stats[$id2]['bc'] += $s1;
+            if ($s1 > $s2) {
+                $stats[$id1]['v']++;
+                $stats[$id2]['p']++;
+            } elseif ($s1 < $s2) {
+                $stats[$id2]['v']++;
+                $stats[$id1]['p']++;
+            } else {
+                $stats[$id1]['n']++;
+                $stats[$id2]['n']++;
+            }
+        }
+        foreach ($stats as &$s) {
+            $s['pts'] = $s['v'] * 3 + $s['n'];
+            $s['diff'] = $s['bp'] - $s['bc'];
+        }
+        unset($s);
+        uasort($stats, static function ($a, $b) {
+            $cmp = $b['pts'] <=> $a['pts'];
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+            $cmp = $b['diff'] <=> $a['diff'];
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+            return strcasecmp($a['equipe']->getNom(), $b['equipe']->getNom());
+        });
+        $result = [];
+        $rang = 1;
+        foreach ($stats as $s) {
+            $s['rang'] = $rang++;
+            $result[] = $s;
+        }
+        return $result;
+    }
+
+    #[Route("/getall" ,name: 'app_match_game_index', methods: ['GET'])]
     public function index(MatchGameRepository $matchGameRepository): Response
     {
         return $this->render('match_game/index.html.twig', [
             'match_games' => $matchGameRepository->findAll(),
+            'tournoi' => null,
+            'classement' => [],
         ]);
     }
 
@@ -39,15 +132,15 @@ final class MatchGameController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            // تأكد match مربوط بتورنو
-            if (!$matchGame->getTournoi()) {
-                return $this->redirectToRoute('app_match_game_new');
+            if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
+                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
+            } elseif (!$matchGame->getTournoi()) {
+                $this->addFlash('error', 'Match doit appartenir à un tournoi');
+            } else {
+                $entityManager->persist($matchGame);
+                $entityManager->flush();
+                return $this->redirectToRoute('app_match_game_index');
             }
-
-            $entityManager->persist($matchGame);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_match_game_index');
         }
 
         return $this->render('match_game/new.html.twig', [
@@ -72,15 +165,14 @@ final class MatchGameController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if (!$matchGame->getTournoi()) {
-                return $this->redirectToRoute('app_match_game_edit', [
-                    'id' => $matchGame->getId()
-                ]);
+            if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
+                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
+            } elseif (!$matchGame->getTournoi()) {
+                $this->addFlash('error', 'Match doit appartenir à un tournoi');
+            } else {
+                $entityManager->flush();
+                return $this->redirectToRoute('app_match_game_index');
             }
-
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_match_game_index');
         }
 
         return $this->render('match_game/edit.html.twig', [

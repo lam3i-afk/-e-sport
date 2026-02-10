@@ -39,8 +39,8 @@ class Tournoi
     #[ORM\Column(nullable: true)]
     private ?int $maxParticipants = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $participants = null;
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $cagnotte = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTime $dateInscriptionLimite = null;
@@ -169,14 +169,14 @@ class Tournoi
         return $this;
     }
 
-    public function getParticipants(): ?int
+    public function getCagnotte(): ?float
     {
-        return $this->participants;
+        return $this->cagnotte;
     }
 
-    public function setParticipants(?int $participants): static
+    public function setCagnotte(?float $cagnotte): static
     {
-        $this->participants = $participants;
+        $this->cagnotte = $cagnotte;
 
         return $this;
     }

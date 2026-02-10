@@ -1,0 +1,391 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement - {{ tournoi.nom }}{% endblock %}
+
+{% block body %}
+<section class="paiement-section">
+    <div class="container">
+        <div class="paiement-card">
+            <div class="paiement-header">
+                <div class="paiement-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </div>
+                <h1>Paiement sécurisé</h1>
+                <p class="paiement-subtitle"><span class="secure-badge">🔒</span> Connexion cryptée</p>
+            </div>
+
+            <div class="paiement-resume">
+                <div class="resume-item">
+                    <span class="resume-label">Tournoi</span>
+                    <span class="resume-value">{{ tournoi.nom }}</span>
+                </div>
+                <div class="resume-item">
+                    <span class="resume-label">Équipe</span>
+                    <span class="resume-value">{{ equipe.nom }}</span>
+                </div>
+                <div class="resume-item resume-total">
+                    <span class="resume-label">Montant</span>
+                    <span class="resume-value montant">{{ tournoi.fraisInscription|default(0) }}€</span>
+                </div>
+            </div>
+
+            <form method="POST" class="paiement-form" action="{{ path('app_tournoi_paiement_process', {'id': tournoi.id}) }}">
+                <input type="hidden" name="equipe_id" value="{{ equipe.id }}">
+                <input type="hidden" name="token" value="{{ csrf_token('paiement_tournoi') }}">
+                <div class="form-section">
+                    <h3 class="form-section-title">Informations carte bancaire</h3>
+                    <div class="form-group">
+                        <label for="card_number">Numéro de carte</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="card_number" name="card_number" class="form-control" placeholder="4242 4242 4242 4242" maxlength="19" required autocomplete="cc-number" inputmode="numeric" title="16 chiffres">
+                        </div>
+                        <span class="field-error" id="card_number_error">Entrez un numéro de carte valide (16 chiffres)</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiry">Date d'expiration</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="expiry" name="expiry" class="form-control" placeholder="MM/AA" maxlength="5" required autocomplete="cc-exp" inputmode="numeric">
+                            </div>
+                            <span class="field-error" id="expiry_error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="cvv" name="cvv" class="form-control" placeholder="123" maxlength="4" required autocomplete="cc-csc" inputmode="numeric" pattern="[0-9]{3,4}" title="3 ou 4 chiffres">
+                            </div>
+                            <span class="input-hint">3 ou 4 chiffres au dos</span>
+                            <span class="field-error" id="cvv_error">3 ou 4 chiffres requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="card_name">Nom sur la carte</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="card_name" name="card_name" class="form-control" placeholder="Jean Dupont" required autocomplete="cc-name" pattern="[a-zA-ZÀ-ÿ\s\-]+" title="Lettres, espaces et tirets uniquement">
+                        </div>
+                        <span class="field-error" id="card_name_error">Lettres, espaces et tirets uniquement</span>
+                    </div>
+                </div>
+                <div class="card-badges">
+                    <span class="card-badge visa">Visa</span>
+                    <span class="card-badge mc">Mastercard</span>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Payer {{ tournoi.fraisInscription|default(0) }}€</span>
+                    </button>
+                    <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<style>
+.paiement-section {
+    padding: 60px 20px;
+    background: linear-gradient(160deg, #0f0c29 0%, #1a1642 40%, #302b63 100%);
+    min-height: 80vh;
+    position: relative;
+}
+.paiement-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,0,110,0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.paiement-card {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    color: #1a1a2e;
+    padding: 0;
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden;
+    position: relative;
+}
+.paiement-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff006e, #8338ec);
+}
+.paiement-header {
+    text-align: center;
+    padding: 32px 40px 24px;
+}
+.paiement-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, #ff006e, #8338ec);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+.paiement-header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+.paiement-subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+.secure-badge { font-size: 0.85em; }
+.paiement-resume {
+    margin: 0 40px 28px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+}
+.resume-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.95rem;
+}
+.resume-item:not(:last-child) { border-bottom: 1px solid #e2e8f0; }
+.resume-label { color: #64748b; font-weight: 500; }
+.resume-value { color: #1e293b; font-weight: 600; }
+.resume-total .resume-value { font-size: 1.25rem; color: #8338ec; }
+.paiement-form {
+    padding: 0 40px 40px;
+}
+.form-section-title {
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.form-group { margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #334155;
+}
+.input-wrapper { position: relative; }
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #8338ec;
+    box-shadow: 0 0 0 4px rgba(131,56,236,0.15);
+}
+.form-control::placeholder { color: #94a3b8; }
+.form-control.invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239,68,68,0.2);
+}
+.field-error {
+    display: none;
+    font-size: 0.8rem;
+    color: #ef4444;
+    margin-top: 6px;
+}
+.field-error.visible { display: block; }
+.input-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.card-badges {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    margin-bottom: 28px;
+}
+.card-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px;
+    letter-spacing: 0.5px;
+}
+.card-badge.visa { background: #1a1f71; color: #fff; }
+.card-badge.mc { background: #eb001b; color: #fff; }
+.form-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #ff006e, #8338ec);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(131,56,236,0.35);
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(131,56,236,0.45);
+}
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+.btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+@media (max-width: 520px) {
+    .paiement-header { padding-left: 24px; padding-right: 24px; }
+    .paiement-form { padding-left: 24px; padding-right: 24px; padding-bottom: 32px; }
+    .paiement-resume { margin-left: 24px; margin-right: 24px; }
+    .form-row { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cardNumber = document.getElementById('card_number');
+    const expiry = document.getElementById('expiry');
+    const cvv = document.getElementById('cvv');
+    const cardName = document.getElementById('card_name');
+    const form = document.querySelector('.paiement-form');
+
+    function showError(el, errEl, msg) {
+        el.classList.add('invalid');
+        errEl.textContent = msg;
+        errEl.classList.add('visible');
+    }
+    function clearError(el, errEl) {
+        el.classList.remove('invalid');
+        errEl.classList.remove('visible');
+    }
+
+    // Numéro de carte : uniquement chiffres, format XXXX XXXX XXXX XXXX
+    cardNumber.addEventListener('input', function(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 16) v = v.slice(0, 16);
+        e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+        clearError(cardNumber, document.getElementById('card_number_error'));
+    });
+    cardNumber.addEventListener('keypress', function(e) {
+        if (!/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+
+    // Date expiration : format MM/AA
+    expiry.addEventListener('input', function(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length >= 2) {
+            let mm = v.slice(0, 2);
+            if (parseInt(mm, 10) > 12) mm = '12';
+            else if (parseInt(mm, 10) < 1) mm = '01';
+            v = mm + v.slice(2);
+        }
+        if (v.length > 4) v = v.slice(0, 4);
+        e.target.value = v.length >= 2 ? v.slice(0, 2) + '/' + v.slice(2) : v;
+        clearError(expiry, document.getElementById('expiry_error'));
+    });
+    expiry.addEventListener('keypress', function(e) {
+        if (!/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+
+    // CVV : uniquement chiffres, 3 ou 4
+    cvv.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        clearError(cvv, document.getElementById('cvv_error'));
+    });
+    cvv.addEventListener('keypress', function(e) {
+        if (!/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+
+    // Nom : lettres, espaces, tirets
+    cardName.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^a-zA-ZÀ-ÿ\s\-]/g, '');
+        clearError(cardName, document.getElementById('card_name_error'));
+    });
+
+    function validateCardNumber(val) {
+        const digits = val.replace(/\s/g, '');
+        return digits.length === 16 && /^\d+$/.test(digits);
+    }
+    function validateExpiry(val) {
+        val = (val || '').trim();
+        const m = val.match(/^(\d{2})\/(\d{2})$/);
+        if (!m) return { ok: false, msg: 'Format MM/AA requis (ex: 12/27)' };
+        const mm = parseInt(m[1], 10);
+        const yy = parseInt(m[2], 10);
+        if (mm < 1 || mm > 12) return { ok: false, msg: 'Mois invalide (01-12)' };
+        const now = new Date();
+        const year = now.getFullYear() % 100;
+        const month = now.getMonth() + 1;
+        const notExpired = yy > year || (yy === year && mm >= month);
+        if (!notExpired) return { ok: false, msg: 'Date d\'expiration dépassée' };
+        return { ok: true };
+    }
+    function validateCvv(val) {
+        return /^\d{3,4}$/.test(val);
+    }
+    function validateCardName(val) {
+        return val.trim().length >= 2 && /^[a-zA-ZÀ-ÿ\s\-]+$/.test(val);
+    }
+
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+
+        if (!validateCardNumber(cardNumber.value)) {
+            showError(cardNumber, document.getElementById('card_number_error'), 'Entrez un numéro de carte valide (16 chiffres)');
+            valid = false;
+        }
+        const expiryResult = validateExpiry(expiry.value);
+        if (!expiryResult.ok) {
+            showError(expiry, document.getElementById('expiry_error'), expiryResult.msg);
+            valid = false;
+        }
+        if (!validateCvv(cvv.value)) {
+            showError(cvv, document.getElementById('cvv_error'), '3 ou 4 chiffres requis');
+            valid = false;
+        }
+        if (!validateCardName(cardName.value)) {
+            showError(cardName, document.getElementById('card_name_error'), 'Nom valide (lettres, espaces, tirets)');
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+            document.querySelector('.form-control.invalid')?.focus();
+        }
+    });
+});
+</script>
+{% endblock %}

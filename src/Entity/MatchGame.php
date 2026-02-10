@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\MatchGameRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MatchGameRepository::class)]
 class MatchGame
@@ -18,10 +19,12 @@ class MatchGame
 
     #[ORM\ManyToOne(targetEntity: Equipe::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Veuillez sélectionner l\'équipe 1.')]
     private ?Equipe $equipe1 = null;
 
     #[ORM\ManyToOne(targetEntity: Equipe::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Veuillez sélectionner l\'équipe 2.')]
     private ?Equipe $equipe2 = null;
 
     #[ORM\Column]
@@ -36,6 +39,7 @@ class MatchGame
     // 🔥 relation avec Tournoi
     #[ORM\ManyToOne(targetEntity: Tournoi::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Veuillez sélectionner un tournoi.')]
     private ?Tournoi $Tournoi = null;
 public function __construct()
     {

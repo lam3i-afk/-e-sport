@@ -316,10 +316,67 @@ body {
     margin-bottom: 20px;
 }
 
+/* Classement */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.section-title i { color: var(--neon-yellow, #eab308); }
+.classement-table-wrapper {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    margin-bottom: 40px;
+}
+.classement-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.classement-table th, .classement-table td {
+    padding: 14px 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+.classement-table th {
+    background: rgba(255,255,255,0.03);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+.classement-table tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+}
+.classement-table .rang { font-weight: 700; color: var(--neon-blue); }
+.classement-table .equipe { text-align: left; font-weight: 600; }
+.classement-table .equipe a { color: var(--text-primary); text-decoration: none; }
+.classement-table .equipe a:hover { color: var(--neon-purple); }
+.classement-table .v { color: var(--neon-green); }
+.classement-table .p { color: var(--neon-pink); }
+.classement-table .diff { font-weight: 600; }
+.classement-table .pts { color: var(--neon-yellow, #eab308); }
+.classement-empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px dashed var(--border-color);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .matches-grid { grid-template-columns: 1fr; }
     .hero-title { font-size: 2.5rem; }
+    .classement-table th, .classement-table td { padding: 10px 8px; font-size: 0.85rem; }
 }
 </style>
 
@@ -327,18 +384,58 @@ body {
 
 <!-- HERO -->
 <div class="hero-section">
-    <h1 class="hero-title">Match Center</h1>
-    <p class="hero-subtitle">Track every battle, every score, and every victory in real-time.</p>
-    
-    <div class="hero-actions">
-        <a href="{{ path('app_match_game_new') }}" class="btn-cta">
-            <i class="fas fa-plus-circle"></i> Create New Match
-        </a>
-    </div>
+    <h1 class="hero-title">{% if tournoi %}{{ tournoi.nom }}{% else %}Match Center{% endif %}</h1>
+    <p class="hero-subtitle">{% if tournoi %}Classement et matchs du tournoi{% else %}Track every battle, every score, and every victory in real-time.{% endif %}</p>
 </div>
+
+<!-- CLASSEMENT (pour vue tournoi : affiché dès le début avec toutes les équipes inscrites) -->
+{% if tournoi is defined and tournoi %}
+<div class="matches-container">
+    <h2 class="section-title"><i class="fas fa-trophy"></i> Classement</h2>
+    {% if classement|default([])|length > 0 %}
+    <div class="classement-table-wrapper">
+        <table class="classement-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Équipe</th>
+                    <th>MJ</th>
+                    <th>V</th>
+                    <th>N</th>
+                    <th>P</th>
+                    <th>BP</th>
+                    <th>BC</th>
+                    <th>Diff</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in classement %}
+                <tr>
+                    <td class="rang">{{ row.rang }}</td>
+                    <td class="equipe"><a href="{{ path('app_equipe_show', {'id': row.equipe.id}) }}">{{ row.equipe.nom }}</a></td>
+                    <td>{{ row.mj }}</td>
+                    <td class="v">{{ row.v }}</td>
+                    <td class="n">{{ row.n }}</td>
+                    <td class="p">{{ row.p }}</td>
+                    <td>{{ row.bp }}</td>
+                    <td>{{ row.bc }}</td>
+                    <td class="diff">{{ row.diff >= 0 ? '+' ~ row.diff : row.diff }}</td>
+                    <td class="pts"><strong>{{ row.pts }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="classement-empty">Aucune équipe inscrite pour l'instant. Le classement s'affichera ici dès que des équipes seront inscrites au tournoi.</p>
+    {% endif %}
+</div>
+{% endif %}
 
 <!-- MATCHES -->
 <div class="matches-container">
+    <h2 class="section-title" {% if tournoi %}style="margin-top:40px;"{% endif %}><i class="fas fa-gamepad"></i> Matchs</h2>
     {% if match_games|length > 0 %}
         <div class="matches-grid">
             {% for match_game in match_games %}
@@ -347,11 +444,12 @@ body {
                 <!-- HEADER -->
                 <div class="card-header">
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <span class="tournament-tag">{{ match_game.tournoi.nom }}</span>
-                        {% if match_game.tournoi.jeu %}
+                        {% if not tournoi %}
+                            <span class="tournament-tag">{{ match_game.tournoi.nom }}</span>
+                        {% endif %}
+                        {% if match_game.tournoi.jeu is defined and match_game.tournoi.jeu %}
                             <span class="game-tag"><i class="fas fa-gamepad"></i> {{ match_game.tournoi.jeu.nom }}</span>
                         {% endif %}
-                    </div>
                     <div class="match-date">
                         <i class="far fa-clock"></i>
                         {{ match_game.dateMatch|date('d M, H:i') }}

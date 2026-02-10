@@ -51,10 +51,15 @@ class MatchGameController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($matchGame);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('admin_match_game_index', [], Response::HTTP_SEE_OTHER);
+            if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
+                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
+            } elseif (!$matchGame->getTournoi()) {
+                $this->addFlash('error', 'Le match doit appartenir à un tournoi.');
+            } else {
+                $entityManager->persist($matchGame);
+                $entityManager->flush();
+                return $this->redirectToRoute('admin_match_game_index', [], Response::HTTP_SEE_OTHER);
+            }
         }
 
         return $this->render('match_game/admin/new.html.twig', [
@@ -89,9 +94,14 @@ class MatchGameController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('admin_match_game_index', [], Response::HTTP_SEE_OTHER);
+            if (!$matchGame->getEquipe1() || !$matchGame->getEquipe2()) {
+                $this->addFlash('error', 'Veuillez sélectionner les deux équipes.');
+            } elseif (!$matchGame->getTournoi()) {
+                $this->addFlash('error', 'Le match doit appartenir à un tournoi.');
+            } else {
+                $entityManager->flush();
+                return $this->redirectToRoute('admin_match_game_index', [], Response::HTTP_SEE_OTHER);
+            }
         }
 
         return $this->render('match_game/admin/edit.html.twig', [

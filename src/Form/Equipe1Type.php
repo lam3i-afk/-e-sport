@@ -7,10 +7,9 @@ use App\Entity\Tournoi;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -38,24 +37,7 @@ class Equipe1Type extends AbstractType
                 'label' => 'Logo (PNG/JPEG)',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/png',
-                            'image/jpeg',
-                            'image/jpg',
-                        ],
-                        'mimeTypesMessage' => 'Please upload a valid PNG or JPEG image',
-                    ])
-                ],
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('owner', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'nom',
-                'label' => 'Team Owner',
-                'attr' => ['class' => 'form-select']
+                'attr' => ['accept' => 'image/png,image/jpeg'],
             ])
         ;
     }

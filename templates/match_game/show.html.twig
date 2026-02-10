@@ -276,59 +276,6 @@ body {
     color: #fca5a5;
 }
 
-/* =========================
-   STREAM BUTTON
-=========================*/
-.btn-stream {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
-    animation: streamGlow 2s ease-in-out infinite;
-}
-
-.btn-stream::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    animation: streamShine 3s infinite;
-}
-
-.btn-stream:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 50px rgba(220, 38, 38, 0.6);
-    color: #fff;
-}
-
-.btn-stream .live-dot {
-    width: 10px;
-    height: 10px;
-    background: #fff;
-    border-radius: 50%;
-    animation: livePulse 1.5s ease-in-out infinite;
-    box-shadow: 0 0 10px #fff;
-}
-
-@keyframes streamGlow {
-    0%, 100% { box-shadow: 0 0 30px rgba(220, 38, 38, 0.4); }
-    50% { box-shadow: 0 0 50px rgba(220, 38, 38, 0.7); }
-}
-
-@keyframes streamShine {
-    0% { left: -100%; }
-    50%, 100% { left: 100%; }
-}
-
-@keyframes livePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .vs-container { flex-direction: column; gap: 30px; }
@@ -431,11 +378,6 @@ body {
     <div class="actions-bar">
         <a href="{{ path('app_match_game_index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to List
-        </a>
-
-        <a href="#" class="btn btn-stream">
-            <span class="live-dot"></span>
-            <i class="fas fa-broadcast-tower"></i> Watch Stream
         </a>
 
         <a href="{{ path('app_match_game_edit', {'id': match_game.id}) }}" class="btn btn-primary">

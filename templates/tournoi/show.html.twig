@@ -15,7 +15,21 @@
             </div>
             <div class="tournament-detail-right">
                 <div class="cta-button">
-                    <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register">S'inscrire</a>
+                    {# normaliser statut en slug #}
+                    {% set raw = tournoi.statut|default('') %}
+                    {% set slug = raw|lower
+                        |replace({' ':'_','É':'e','é':'e','è':'e','ê':'e','à':'a','á':'a','â':'a','ù':'u','û':'u','ç':'c'}) %}
+                    {% if slug matches '/termin.*/' %}{% set slug = 'termine' %}{% endif %}
+
+                    {% set canRegister = slug not in ['en_cours','encours','termine'] %}
+                    {% if canRegister %}
+                        <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-register">S'inscrire</a>
+                    {% else %}
+                        <button class="btn-register disabled" disabled>
+                            {% if slug == 'en_cours' %}Tournoi en cours{% else %}Inscriptions fermées{% endif %}
+                        </button>
+                    {% endif %}
+
                     {% set current = tournoi.equipes ? tournoi.equipes|length : 0 %}
                     {% set max = tournoi.maxParticipants ?: 0 %}
                     <p class="places">Places disponibles: {{ max > 0 ? (max - current) : '—' }}</p>
@@ -56,6 +70,16 @@
                     <div class="progress" style="width: {{ max > 0 ? ((current / max) * 100) : 0 }}%"></div>
                 </div>
                 <p>{{ current }} / {{ max ?: '—' }}</p>
+                {# Afficher la liste des équipes inscrites #}
+                {% if tournoi.equipes and tournoi.equipes|length > 0 %}
+                    <div class="team-list" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+                        {% for equipe in tournoi.equipes %}
+                            <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="team-chip" title="{{ equipe.nom }}">{{ equipe.nom }}</a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="margin-top:10px;color:rgba(255,255,255,0.6)">Aucune équipe inscrite pour l'instant.</p>
+                {% endif %}
             </div>
 
             <div class="info-card">
@@ -189,6 +213,13 @@
     .btn-register:hover {
         background: transparent;
         color: white;
+    }
+
+    /* forcer le bouton d'inscription au premier plan pour être cliquable */
+    .btn-register, .btn-register-large {
+        position: relative;
+        z-index: 99999;
+        pointer-events: auto;
     }
 
     .places {
@@ -372,4 +403,120 @@
         }
     }
 </style>
+<style>
+/* simple modal styles (for AJAX registration modal) */
+.remote-modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:200000;
+}
+.remote-modal{
+  width:min(980px,95%);
+  max-height:90vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  position:relative;
+}
+.remote-modal .close-btn{
+  position:absolute;
+  right:12px;
+  top:8px;
+  background:transparent;
+  border:none;
+  font-size:20px;
+  cursor:pointer;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // Intercept clicks and open register page inside a modal (AJAX) when possible.
+    document.querySelectorAll('.btn-register, .btn-register-large').forEach(function(el){
+        if(el.tagName.toLowerCase() !== 'a') return;
+        el.addEventListener('click', function(e){
+            const href = el.getAttribute('href');
+            if(!href || href === '#') {
+                e.preventDefault();
+                return;
+            }
+            // Try AJAX modal, fallback to full navigation on error
+            e.preventDefault();
+            openRegisterModal(href);
+        });
+    });
+});
+
+function openRegisterModal(url){
+  let existing = document.getElementById('remoteModalBackdrop');
+  if(!existing){
+    existing = document.createElement('div');
+    existing.id = 'remoteModalBackdrop';
+    existing.className = 'remote-modal-backdrop';
+    existing.style.display = 'none';
+    document.body.appendChild(existing);
+  }
+  existing.innerHTML = '<div class=\"remote-modal\" role=\"dialog\" aria-modal=\"true\"><button class=\"close-btn\" aria-label=\"Fermer\">✕</button><div class=\"remote-modal-body\" style=\"padding-top:8px\"></div></div>';
+  existing.style.display = 'flex';
+
+  const closeBtn = existing.querySelector('.close-btn');
+  closeBtn.addEventListener('click', closeModal);
+  existing.addEventListener('click', function(ev){
+    if(ev.target === existing) closeModal();
+  });
+
+  fetch(url, { credentials: 'same-origin' })
+    .then(resp => resp.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      let fragment = doc.querySelector('.registration-wrap') || doc.querySelector('.registration-card') || doc.querySelector('form.registration-form') || doc.body;
+      const body = existing.querySelector('.remote-modal-body');
+      if(fragment){
+        body.innerHTML = '';
+        body.appendChild(fragment.cloneNode(true));
+        const f = body.querySelector('form');
+        if(f){
+          // ensure form posts to register URL
+          f.setAttribute('action', url);
+          // simple client-side validation
+          f.addEventListener('submit', function(ev){
+            const sel = f.querySelector('select[name=\"equipe_id\"]');
+            if(sel && !sel.value){
+              ev.preventDefault();
+              if(!body.querySelector('.form-error')){
+                const err = document.createElement('div');
+                err.className = 'form-error';
+                err.style.color = '#c53030';
+                err.style.marginTop = '8px';
+                err.textContent = 'Veuillez sélectionner une équipe.';
+                f.appendChild(err);
+              }
+              return false;
+            }
+            return true;
+          });
+        }
+      } else {
+        body.innerHTML = '<pre>' + html.substring(0,2000) + '...</pre>';
+      }
+    })
+    .catch(err => {
+      console.error('Fetch register failed:', err);
+      // fallback navigation
+      window.location.href = url;
+    });
+}
+
+function closeModal(){
+  const existing = document.getElementById('remoteModalBackdrop');
+  if(existing) existing.style.display = 'none';
+}
+</script>
 {% endblock %}

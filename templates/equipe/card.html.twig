@@ -37,11 +37,19 @@
             View
         </button>
 
-        <a href="{{ path('app_equipe_join', {id: equipe.id}) }}"
-           class="btn btn-join">
-            <i class="fas fa-users"></i>
-            Join Team
-        </a>
+        {% if is_member|default(false) %}
+            <a href="{{ path('app_equipe_dashboard', {id: equipe.id}) }}"
+               class="btn btn-join">
+                <i class="fas fa-tachometer-alt"></i>
+                Mon équipe
+            </a>
+        {% else %}
+            <a href="{{ path('app_equipe_join', {id: equipe.id}) }}"
+               class="btn btn-join">
+                <i class="fas fa-users"></i>
+                Join Team
+            </a>
+        {% endif %}
 
     </div>
 

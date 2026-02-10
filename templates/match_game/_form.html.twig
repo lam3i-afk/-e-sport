@@ -1,189 +1,74 @@
-{% extends 'base.html.twig' %}
+{{ form_start(form, {'attr': {'class': 'match-form'}}) }}
 
-{% block title %}Create / Edit Match{% endblock %}
-
-{% block body %}
-
-<style>
-/* =========================
-   GLOBAL THEME
-=========================*/
-:root {
-    --bg: #020617;
-    --card: rgba(15, 23, 42, 0.6);
-    --border: rgba(255, 255, 255, 0.08);
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --primary: #3b82f6;
-    --accent: #ec4899;
-    --input-bg: rgba(2, 6, 23, 0.5);
-}
-
-/* Card */
-.form-card {
-    background: var(--card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* Form Grid */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-/* Fields */
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.form-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.form-input {
-    background: var(--input-bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    background: rgba(2, 6, 23, 0.8);
-}
-
-/* Buttons */
-.btn {
-    padding: 14px 28px;
-    border-radius: 14px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary), #2563eb);
-    color: #fff;
-    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
-}
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 35px -5px rgba(59, 130, 246, 0.5);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-/* Actions */
-.form-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 30px;
-    padding-top: 30px;
-    border-top: 1px solid var(--border);
-}
-
-/* Responsive */
-@media(max-width: 640px){
-    .form-grid { grid-template-columns: 1fr; }
-    .form-card { padding: 25px; }
-}
-</style>
-
-
-<div class="container">
-
-    <h1 class="page-title">⚡ Create / Edit Match</h1>
-
-    <div class="form-card">
-
-        {{ form_start(form, {'attr': {'class': 'modern-form'}}) }}
-
-        <div class="form-grid">
-
-            <div class="form-field">
-                <label class="form-label">Team 1</label>
-                {{ form_widget(form.equipe1, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.equipe1) }}
-            </div>
-
-            <div class="form-field">
-                <label class="form-label">Team 2</label>
-                {{ form_widget(form.equipe2, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.equipe2) }}
-            </div>
-
-            <div class="form-field">
-                <label class="form-label">Score Team 1</label>
-                {{ form_widget(form.scoreTeam1, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.scoreTeam1) }}
-            </div>
-
-            <div class="form-field">
-                <label class="form-label">Score Team 2</label>
-                {{ form_widget(form.scoreTeam2, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.scoreTeam2) }}
-            </div>
-
-            <div class="form-field">
-                <label class="form-label">Match Date & Time</label>
-                {{ form_widget(form.dateMatch, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.dateMatch) }}
-            </div>
-
-            <div class="form-field">
-                <label class="form-label">Tournament</label>
-                {{ form_widget(form.Tournoi, {'attr': {'class': 'form-input'}}) }}
-                {{ form_errors(form.Tournoi) }}
-            </div>
-
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                💾 {{ button_label|default('Save Match') }}
-            </button>
-
-            <a href="{{ path('app_match_game_index') }}" class="btn btn-secondary">
-                ✖ Cancel
-            </a>
-        </div>
-
-        {{ form_end(form) }}
-
+{# Section Tournoi #}
+<div class="form-section">
+    <h3 class="form-section-title"><i class="fas fa-trophy"></i> Tournoi</h3>
+    <div class="form-field full-width">
+        <label class="form-label">Tournoi</label>
+        {{ form_widget(form.Tournoi, {'attr': {'class': 'form-input form-select'}}) }}
+        {{ form_errors(form.Tournoi) }}
     </div>
 </div>
 
-{% endblock %}
+{# Section Équipes #}
+<div class="form-section">
+    <h3 class="form-section-title"><i class="fas fa-users"></i> Équipes</h3>
+    <div class="form-grid-2">
+        <div class="form-field">
+            <label class="form-label">Équipe 1</label>
+            {{ form_widget(form.equipe1, {'attr': {'class': 'form-input form-select'}}) }}
+            {{ form_errors(form.equipe1) }}
+        </div>
+        <div class="form-field">
+            <label class="form-label">Équipe 2</label>
+            {{ form_widget(form.equipe2, {'attr': {'class': 'form-input form-select'}}) }}
+            {{ form_errors(form.equipe2) }}
+        </div>
+    </div>
+</div>
+
+{# Section Date & Statut #}
+<div class="form-section">
+    <h3 class="form-section-title"><i class="fas fa-calendar-alt"></i> Date et statut</h3>
+    <div class="form-grid-2">
+        <div class="form-field">
+            <label class="form-label">Date et heure du match</label>
+            {{ form_widget(form.dateMatch, {'attr': {'class': 'form-input'}}) }}
+            {{ form_errors(form.dateMatch) }}
+        </div>
+        <div class="form-field">
+            <label class="form-label">Statut</label>
+            {{ form_widget(form.statut, {'attr': {'class': 'form-input form-select'}}) }}
+            {{ form_errors(form.statut) }}
+        </div>
+    </div>
+</div>
+
+{# Section Scores #}
+<div class="form-section">
+    <h3 class="form-section-title"><i class="fas fa-futbol"></i> Scores</h3>
+    <p class="form-hint">Laissez 0 si le match n'a pas encore été joué.</p>
+    <div class="form-grid-2">
+        <div class="form-field">
+            <label class="form-label">Score équipe 1</label>
+            {{ form_widget(form.scoreTeam1, {'attr': {'class': 'form-input', 'min': 0, 'placeholder': '0'}}) }}
+            {{ form_errors(form.scoreTeam1) }}
+        </div>
+        <div class="form-field">
+            <label class="form-label">Score équipe 2</label>
+            {{ form_widget(form.scoreTeam2, {'attr': {'class': 'form-input', 'min': 0, 'placeholder': '0'}}) }}
+            {{ form_errors(form.scoreTeam2) }}
+        </div>
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ button_label|default('Enregistrer') }}
+    </button>
+    <a href="{{ path('app_match_game_index2') }}" class="btn btn-secondary">
+        <i class="fas fa-times"></i> Annuler
+    </a>
+</div>
+
+{{ form_end(form) }}

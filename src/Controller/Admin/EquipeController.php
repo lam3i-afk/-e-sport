@@ -108,9 +108,18 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/{id}', name: 'admin_equipe_delete', methods: ['POST'])]
-    public function delete(Request $request, Equipe $equipe, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Equipe $equipe, EntityManagerInterface $entityManager, \App\Repository\MatchGameRepository $matchGameRepository): Response
     {
         if ($this->isCsrfTokenValid('delete'.$equipe->getId(), $request->request->get('_token'))) {
+            foreach ($matchGameRepository->findByEquipe($equipe) as $matchGame) {
+                $entityManager->remove($matchGame);
+            }
+            $inscriptions = $entityManager->getRepository(\App\Entity\InscriptionTournoi::class)->findBy(['equipe' => $equipe]);
+            foreach ($inscriptions as $inscription) {
+                $entityManager->remove($inscription);
+            }
+            $equipe->getTournois()->clear();
+            $entityManager->flush();
             $entityManager->remove($equipe);
             $entityManager->flush();
         }

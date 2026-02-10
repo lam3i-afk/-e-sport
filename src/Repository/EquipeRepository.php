@@ -40,4 +40,20 @@ class EquipeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Retourne les équipes que l'utilisateur peut inscrire : propriétaire OU membre.
+     */
+    public function findEligibleForUser(object $user): array
+    {
+        return $this->createQueryBuilder('e')
+            ->leftJoin('e.members', 'm')
+            ->where('e.owner = :user')
+            ->orWhere('m = :user')
+            ->setParameter('user', $user)
+            ->orderBy('e.nom', 'ASC')
+            ->distinct()
+            ->getQuery()
+            ->getResult();
+    }
 }

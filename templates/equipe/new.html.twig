@@ -54,7 +54,7 @@
     </div>
 
     <div class="form-card">
-        {{ include('equipe/_form.html.twig') }}
+        {{ include('equipe/_form.html.twig', { return_to_tournoi: return_to_tournoi|default(null) }) }}
     </div>
 </div>
 {% endblock %}

@@ -1,147 +1,284 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}S'inscrire au tournoi - {{ tournoi.nom }}{% endblock %}
+{% block title %}Inscription - {{ tournoi.nom }}{% endblock %}
 
 {% block body %}
-<section class="registration-section">
+<section class="register-tournoi-section">
+    <div class="register-bg-shape"></div>
     <div class="container">
-        <div class="registration-card">
-            <h1>S'inscrire à {{ tournoi.nom }}</h1>
-            
-            <div class="tournament-info-box">
-                <p><strong>Jeu:</strong> {{ tournoi.jeu.nom }}</p>
-                <p><strong>Date début:</strong> {{ tournoi.dateDebut|date('d M Y à H:i') }}</p>
-                <p><strong>Frais d'inscription:</strong> {{ tournoi.fraisInscription|default('Gratuit') }}€</p>
+        <div class="registration-wrap">
+            <div class="register-card">
+                <div class="register-header">
+                    <span class="register-badge">Inscription</span>
+                    <h1 class="register-title">Choisissez votre équipe</h1>
+                    <p class="register-tournoi-name">{{ tournoi.nom }}</p>
+                    {% if tournoi.jeu %}
+                        <span class="register-game-badge">{{ tournoi.jeu.nom }}</span>
+                    {% endif %}
+                </div>
+
+                {% if equipes|length > 0 %}
+                    <form method="post" action="{{ path('app_tournoi_register', { id: tournoi.id }) }}" class="registration-form">
+                        <input type="hidden" name="token" value="{{ csrf_token('register_tournament') }}">
+                        <div class="form-group">
+                            <label for="equipe_id"><i class="fas fa-users me-2"></i>Choisir une équipe</label>
+                            <select name="equipe_id" id="equipe_id" class="form-select" required>
+                                <option value="">— Sélectionnez une équipe —</option>
+                                {% for equipe in equipes %}
+                                    <option value="{{ equipe.id }}">{{ equipe.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary-action">
+                            <i class="fas fa-check-circle me-2"></i>Inscrire cette équipe
+                        </button>
+                    </form>
+                    <div class="register-divider">
+                        <span class="divider-line"></span>
+                        <span class="divider-text">ou</span>
+                        <span class="divider-line"></span>
+                    </div>
+                    <div class="create-team-option">
+                        <p class="create-team-label">Vous n'avez pas l'équipe qu'il vous faut ?</p>
+                        <a href="{{ path('app_equipe_new', { return_to_tournoi: tournoi.id }) }}" class="btn btn-secondary-action">
+                            <i class="fas fa-plus-circle me-2"></i>Créer une nouvelle équipe
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="no-teams-block">
+                        <div class="no-teams-icon"><i class="fas fa-user-friends"></i></div>
+                        <p class="no-teams-text">Vous n'avez pas encore d'équipe.<br>Créez-en une pour vous inscrire à ce tournoi.</p>
+                        <a href="{{ path('app_equipe_new', { return_to_tournoi: tournoi.id }) }}" class="btn btn-primary-action">
+                            <i class="fas fa-plus me-2"></i>Créer une équipe
+                        </a>
+                    </div>
+                {% endif %}
+
+                <div class="register-footer">
+                    <a href="{{ path('app_tournoi_show', { id: tournoi.id }) }}" class="btn-back-link">
+                        <i class="fas fa-arrow-left me-2"></i>Retour au tournoi
+                    </a>
+                </div>
             </div>
-
-            <form method="POST" class="registration-form">
-                <input type="hidden" name="token" value="{{ csrf_token('register_tournament') }}">
-                <div class="form-group">
-                    <label for="equipe_id">Sélectionnez votre équipe:</label>
-                    <select name="equipe_id" id="equipe_id" required class="form-control">
-                        <option value="">-- Choisir une équipe --</option>
-                        {% for equipe in equipes %}
-                            <option value="{{ equipe.id }}">{{ equipe.nom }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Confirmer l'inscription</button>
-                    <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn btn-secondary">Annuler</a>
-                </div>
-            </form>
         </div>
     </div>
 </section>
 
 <style>
-    .registration-section {
-        padding: 60px 20px;
-        background: #f5f5f5;
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
-    }
-
-    .registration-card {
-        background: white;
-        border-radius: 10px;
-        padding: 40px;
-        max-width: 500px;
-        margin: 0 auto;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .registration-card h1 {
-        text-align: center;
-        color: #ff006e;
-        margin-bottom: 30px;
-        font-size: 2em;
-    }
-
-    .tournament-info-box {
-        background: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 30px;
-        border-left: 4px solid #ff006e;
-    }
-
-    .tournament-info-box p {
-        margin: 10px 0;
-        font-size: 0.95em;
-    }
-
-    .registration-form {
-        margin-top: 30px;
-    }
-
-    .form-group {
-        margin-bottom: 25px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 1em;
-        transition: border-color 0.3s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #ff006e;
-        box-shadow: 0 0 5px rgba(255, 0, 110, 0.3);
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
-    }
-
-    .btn {
-        flex: 1;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 1em;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-primary {
-        background: #ff006e;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #e60060;
-        transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-        background: #ddd;
-        color: #333;
-    }
-
-    .btn-secondary:hover {
-        background: #ccc;
-        transform: translateY(-2px);
-    }
+.register-tournoi-section {
+    min-height: 100vh;
+    padding: 80px 20px 60px;
+    background: linear-gradient(160deg, #0f0c29 0%, #1e1b4b 35%, #312e81 70%, #24243e 100%);
+    position: relative;
+    overflow: hidden;
+}
+.register-bg-shape {
+    position: absolute;
+    top: -20%;
+    right: -15%;
+    width: 50%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+.register-bg-shape::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -20%;
+    width: 45%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(236, 72, 153, 0.1) 0%, transparent 70%);
+}
+.registration-wrap {
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+.register-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 40px 36px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.03) inset;
+}
+.register-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.register-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(139, 92, 246, 0.25);
+    color: #c4b5fd;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 100px;
+    margin-bottom: 12px;
+}
+.register-title {
+    color: #fff;
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+.register-tournoi-name {
+    color: #e2e8f0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+.register-game-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+.registration-form .form-group {
+    margin-bottom: 24px;
+}
+.registration-form label {
+    display: block;
+    color: #cbd5e1;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+.registration-form label i {
+    opacity: 0.9;
+}
+.registration-form .form-select {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    color: #e2e8f0;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.registration-form .form-select:focus {
+    outline: none;
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    border-radius: 14px;
+}
+.btn-primary-action {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #6366f1 100%);
+    background-size: 200% 200%;
+    color: #fff;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+}
+.btn-primary-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(168, 85, 247, 0.5);
+    color: #fff;
+}
+.btn-primary-action:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.4);
+}
+.btn-secondary-action {
+    width: 100%;
+    padding: 14px 24px;
+    background: transparent;
+    color: #a78bfa;
+    border: 2px solid rgba(167, 139, 250, 0.5);
+    font-size: 1rem;
+}
+.btn-secondary-action:hover {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: #a78bfa;
+    color: #e9d5ff;
+    transform: translateY(-1px);
+}
+.register-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0 24px;
+}
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+}
+.divider-text {
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+.create-team-option {
+    text-align: center;
+    padding: 8px 0 4px;
+}
+.create-team-label {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    margin: 0 0 14px 0;
+}
+.no-teams-block {
+    text-align: center;
+    padding: 24px 0 8px;
+}
+.no-teams-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a78bfa;
+    font-size: 1.75rem;
+}
+.no-teams-text {
+    color: #94a3b8;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+}
+.register-footer {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+.btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.btn-back-link:hover {
+    color: #e2e8f0;
+}
+.me-2 { margin-right: 8px; }
 </style>
 {% endblock %}

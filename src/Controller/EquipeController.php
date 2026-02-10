@@ -6,7 +6,9 @@ use App\Entity\Equipe;
 use App\Entity\User;
 use App\Entity\Tournoi;
 use App\Entity\MatchGame;
+use App\Entity\InscriptionTournoi;
 use App\Form\Equipe1Type;
+use App\Repository\MatchGameRepository;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,12 +76,20 @@ final class EquipeController extends AbstractController
             $entityManager->persist($equipe);
             $entityManager->flush();
 
+            $returnToTournoi = $request->query->getInt('return_to_tournoi', 0) ?: $request->request->getInt('return_to_tournoi', 0);
+            if ($returnToTournoi > 0) {
+                return $this->redirectToRoute('app_tournoi_register', ['id' => $returnToTournoi]);
+            }
+
             return $this->redirectToRoute('app_equipe_dashboard', ['id' => $equipe->getId()]);
         }
+
+        $returnToTournoi = $request->query->getInt('return_to_tournoi', 0);
 
         return $this->render('equipe/new.html.twig', [
             'equipe' => $equipe,
             'form' => $form,
+            'return_to_tournoi' => $returnToTournoi ?: null,
         ]);
     }
 
@@ -138,13 +148,22 @@ final class EquipeController extends AbstractController
     }
 
     #[Route('/{id<\d+>}', name: 'app_equipe_delete', methods: ['POST'])]
-    public function delete(Request $request, int $id, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, int $id, EntityManagerInterface $entityManager, MatchGameRepository $matchGameRepository): Response
     {
         $equipe = $entityManager->getRepository(Equipe::class)->find($id);
         if (!$equipe) {
             return $this->redirectToRoute('app_equipe_index');
         }
         if ($this->isCsrfTokenValid('delete'.$equipe->getId(), $request->request->get('_token'))) {
+            foreach ($matchGameRepository->findByEquipe($equipe) as $matchGame) {
+                $entityManager->remove($matchGame);
+            }
+            $inscriptions = $entityManager->getRepository(InscriptionTournoi::class)->findBy(['equipe' => $equipe]);
+            foreach ($inscriptions as $inscription) {
+                $entityManager->remove($inscription);
+            }
+            $equipe->getTournois()->clear();
+            $entityManager->flush();
             $entityManager->remove($equipe);
             $entityManager->flush();
         }
@@ -397,17 +416,17 @@ final class EquipeController extends AbstractController
             return $this->redirectToRoute('app_equipe_index');
         }
 
-        $allTeams = $entityManager->getRepository(Equipe::class)->findAll();
-        $notMemberTeams = [];
-
-        foreach ($allTeams as $team) {
-            if (!$team->getMembers()->contains($user)) {
-                $notMemberTeams[] = $team;
+        $equipes = $entityManager->getRepository(Equipe::class)->findAll();
+        $userTeamIds = [];
+        foreach ($equipes as $team) {
+            if ($team->getOwner() === $user || $team->getMembers()->contains($user)) {
+                $userTeamIds[] = $team->getId();
             }
         }
         
         return $this->render('equipe/afficher.html.twig', [
-            'equipes' => $notMemberTeams,
+            'equipes' => $equipes,
+            'user_team_ids' => $userTeamIds,
         ]);
     }
 }

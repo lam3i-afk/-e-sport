@@ -1,5 +1,8 @@
 {# templates/equipe/_form.html.twig #}
 {{ form_start(form, {'attr': {'class': 'needs-validation'}, 'multipart': true}) }}
+{% if return_to_tournoi is defined and return_to_tournoi %}
+    <input type="hidden" name="return_to_tournoi" value="{{ return_to_tournoi }}">
+{% endif %}
 
 <div class="mb-4">
     <label class="form-label" style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Team Name</label>

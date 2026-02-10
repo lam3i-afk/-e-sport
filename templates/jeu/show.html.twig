@@ -41,6 +41,10 @@
         {% if jeu.tournois|length > 0 %}
             <div class="tournaments-grid">
                 {% for tournoi in jeu.tournois %}
+                    {% set raw = tournoi.statut|default('') %}
+                    {% set slug = raw|lower|replace({' ':'_','É':'e','é':'e','è':'e','ê':'e','à':'a','á':'a','â':'a','ù':'u','û':'u','ç':'c'}) %}
+                    {% if slug matches '/termin.*/' %}{% set slug = 'termine' %}{% endif %}
+                    {% set showMatchs = slug in ['en_cours', 'encours', 'termine'] %}
                     <div class="tournament-card">
                         <div class="tournament-header">
                             <h3>{{ tournoi.nom }}</h3>
@@ -48,9 +52,14 @@
                         </div>
                         <div class="tournament-details">
                             <p><strong>Dates:</strong> {{ tournoi.dateDebut|date('d/m/Y') }} - {{ tournoi.dateFin|date('d/m/Y') }}</p>
-                            <p><strong>Participants:</strong> {{ tournoi.participants ? tournoi.participants|length : 0 }}/{{ tournoi.maxParticipants }}</p>
+                            <p><strong>Participants:</strong> {{ (equipesParTournoi[tournoi.id] ?? [])|length }}/{{ tournoi.maxParticipants }}</p>
                         </div>
-                        <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn-secondary">Détails</a>
+                        <div class="tournament-actions">
+                            <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn-secondary">Détails</a>
+                            {% if showMatchs %}
+                                <a href="{{ path('app_match_game_by_tournoi', {'tournoiId': tournoi.id}) }}" class="btn-secondary btn-matchs">Matchs</a>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -229,6 +238,13 @@
         margin: 10px 0;
         color: rgba(255, 255, 255, 0.8);
         font-size: 0.95em;
+    }
+
+    .tournament-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
     }
 
     .btn-secondary {

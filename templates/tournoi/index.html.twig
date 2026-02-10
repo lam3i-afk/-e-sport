@@ -14,12 +14,12 @@
 
         <div class="filters">
             <input type="text" id="search-input" placeholder="Rechercher un tournoi..." class="search-input">
-            <select class="filter-select" id="status-filter">
-                <option value="">Tous les statuts</option>
-                <option value="en_attente">En attente</option>
-                <option value="en_cours">En cours</option>
-                <option value="terminé">Terminé</option>
-            </select>
+            <div class="status-buttons" style="display:flex;gap:10px;align-items:center;">
+                <button type="button" class="status-filter-btn active" data-status="">Tous</button>
+                <button type="button" class="status-filter-btn" data-status="en_attente">En attente</button>
+                <button type="button" class="status-filter-btn" data-status="en_cours">En cours</button>
+                <button type="button" class="status-filter-btn" data-status="termine">Terminé</button>
+            </div>
         </div>
 
         <div class="tournaments-list-container">
@@ -32,20 +32,58 @@
                             <i class="icon">📅</i>
                             {{ tournoi.dateDebut|date('d M Y') }} - {{ tournoi.dateFin|date('d M Y') }}
                         </p>
+                        {# Liste des équipes inscrites (aperçu) #}
+                        {% set equipesListe = equipesParTournoi[tournoi.id] ?? [] %}
+                        {% set equipesCount = equipesListe|length %}
+                        {% if equipesCount > 0 %}
+                            <div class="team-list-preview" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                                {% for equipe in equipesListe|slice(0,3) %}
+                                    <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="team-chip small">{{ equipe.nom }}</a>
+                                {% endfor %}
+                                {% if equipesCount > 3 %}
+                                    <span class="team-chip small">+{{ equipesCount - 3 }} autres</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="tournament-middle">
                         <div class="info-box">
                             <span class="label">Participants</span>
-                            <span class="value">{{ tournoi.equipes ? tournoi.equipes|length : 0 }}/{{ tournoi.maxParticipants ?: '—' }}</span>
+                            <span class="value">{{ equipesCount }}/{{ tournoi.maxParticipants ?: '—' }}</span>
                         </div>
                         <div class="info-box">
                             <span class="label">Cagnotte</span>
-                            <span class="value">0€</span>
+                            <span class="value">{{ tournoi.cagnotte is not null ? (tournoi.cagnotte ~ '€') : '0€' }}</span>
                         </div>
                     </div>
                     <div class="tournament-right">
-                        <span class="status status-{{ tournoi.statut }}">{{ tournoi.statut }}</span>
-                        <a href="{{ path('app_tournoi_show', {'id': tournoi.id}) }}" class="btn-details">S'inscrire</a>
+                        {% set raw = tournoi.statut|default('') %}
+                        {% set slug = raw|lower
+                            |replace({' ':'_','É':'e','é':'e','è':'e','ê':'e','à':'a','á':'a','â':'a','ù':'u','û':'u','ç':'c'}) %}
+                        {% if slug matches '/termin.*/' %}{% set slug = 'termine' %}{% endif %}
+                        <span class="status status-badge status-{{ slug }}">
+                            {% if slug == 'en_attente' %}
+                                <i class="fas fa-clock icon"></i> En attente
+                            {% elseif slug == 'en_cours' %}
+                                <i class="fas fa-spinner fa-pulse icon"></i> En cours
+                            {% elseif slug == 'termine' %}
+                                <i class="fas fa-check icon"></i> Terminé
+                            {% else %}
+                                {{ raw }}
+                            {% endif %}
+                        </span>
+
+                        {# Bouton d'inscription ou Matchs selon le statut #}
+                        {% set allowed = slug not in ['en_cours', 'encours', 'termine'] %}
+                        {% set showMatchs = slug in ['en_cours', 'encours', 'termine'] %}
+                        {% if allowed %}
+                            <a href="{{ path('app_tournoi_register', {'id': tournoi.id}) }}" class="btn-details">S'inscrire</a>
+                        {% else %}
+                            <button class="btn-details disabled" disabled>Inscription fermée</button>
+                        {% endif %}
+                        {% if showMatchs %}
+                            <a href="{{ path('app_match_game_by_tournoi', {'tournoiId': tournoi.id}) }}" class="btn-details btn-matchs">Matchs</a>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -87,13 +125,31 @@
         flex-wrap: wrap;
     }
 
-    .search-input, .filter-select {
+    .search-input {
         padding: 12px 20px;
         border-radius: 25px;
         border: 1px solid rgba(255, 255, 255, 0.2);
         background: rgba(255, 255, 255, 0.05);
         color: white;
         font-size: 1em;
+    }
+
+    .status-filter-btn{
+        padding:8px 12px;
+        border-radius:20px;
+        border:1px solid rgba(255,255,255,0.12);
+        background:transparent;
+        color:rgba(255,255,255,0.9);
+        cursor:pointer;
+        font-weight:600;
+        transition: all .15s ease;
+    }
+    .status-filter-btn:hover{ transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+    .status-filter-btn.active{
+        background: linear-gradient(135deg,#ff006e,#8338ec);
+        color:white;
+        border-color:transparent;
+        box-shadow: 0 10px 30px rgba(131,56,236,0.22);
     }
 
     .search-input::placeholder {
@@ -182,28 +238,42 @@
         gap: 15px;
     }
 
-    .status {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.9em;
-        font-weight: bold;
-        text-transform: capitalize;
+    /* Nouveau design des badges de statut */
+    .status-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:10px;
+        padding:8px 14px;
+        border-radius:14px;
+        font-weight:700;
+        font-size:0.9rem;
+        line-height:1;
+        color:#0b1220;
+        background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.9));
+        box-shadow: 0 6px 18px rgba(2,6,23,0.15);
+        border:1px solid rgba(0,0,0,0.06);
     }
+    .status-badge .icon{ font-size:0.95rem; color:inherit; opacity:0.95; }
 
-    .status-en_attente {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffc107;
-    }
+    .status-en_attente{ background: linear-gradient(90deg,#fff3cd,#fff0b8); color:#8a5a00; border-color: #ffe8a6; }
+    .status-en_cours{ background: linear-gradient(90deg,#e7f5ff,#d7f0ff); color:#054a54; border-color: #bfe9ff; }
+    .status-termine, .status-termine{ background: linear-gradient(90deg,#dff3e6,#cfead1); color:#0f5132; border-color:#b7d6c4; }
+    .status-default{ background:#f1f3f5; color:#374151; border-color:#e5e7eb; }
 
-    .status-en_cours {
-        background: rgba(33, 150, 243, 0.2);
-        color: #2196f3;
+    /* petite pastille à gauche */
+    .status-badge::before{
+        content: "";
+        width:9px;
+        height:9px;
+        border-radius:50%;
+        display:inline-block;
+        margin-left:-6px;
+        margin-right:6px;
+        box-shadow: inset 0 0 6px rgba(0,0,0,0.08);
     }
-
-    .status-terminé {
-        background: rgba(76, 175, 80, 0.2);
-        color: #4caf50;
-    }
+    .status-en_attente::before{ background:#f0b429; }
+    .status-en_cours::before{ background:#2196f3; }
+    .status-termine::before{ background:#4caf50; }
 
     .btn-details {
         background: linear-gradient(135deg, #ff006e, #8338ec);
@@ -219,6 +289,10 @@
     .btn-details:hover {
         transform: scale(1.05);
         box-shadow: 0 10px 25px rgba(255, 0, 110, 0.3);
+    }
+
+    .btn-details.btn-matchs {
+        background: linear-gradient(135deg, #2196f3, #1976d2);
     }
 
     @media (max-width: 1024px) {
@@ -258,48 +332,42 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const statusFilter = document.getElementById('status-filter');
     const searchInput = document.getElementById('search-input');
     const tournamentItems = document.querySelectorAll('.tournament-item');
+    const statusButtons = document.querySelectorAll('.status-filter-btn');
 
-    function filterTournaments() {
-        const selectedStatus = statusFilter.value.trim();
+    function normalizeStatus(raw) {
+        if(!raw) return '';
+        return raw.toString().toLowerCase()
+            .replace(/[éèêë]/g,'e')
+            .replace(/[àáâãä]/g,'a')
+            .replace(/[ùúûü]/g,'u')
+            .replace(/ç/g,'c')
+            .replace(/\s+/g,'_')
+            .replace(/[^a-z0-9_]/g,'')
+            .replace(/_+/g,'_')
+            .replace(/^_|_$/g,'');
+    }
+
+    function filterTournaments(selectedStatusSlug) {
+        const sel = (selectedStatusSlug || '').trim();
         const searchTerm = searchInput.value.toLowerCase().trim();
 
-        if (tournamentItems.length === 0) {
-            console.log('No tournament items found');
-            return;
-        }
+        if (tournamentItems.length === 0) return;
 
         tournamentItems.forEach(item => {
             try {
                 const statusElement = item.querySelector('.status');
                 const nameElement = item.querySelector('.tournament-left h3');
-                
-                if (!statusElement || !nameElement) {
-                    console.log('Missing elements in tournament item');
-                    return;
-                }
+                if (!statusElement || !nameElement) return;
 
-                // Extract status from the CSS class name
-                const classNames = statusElement.className;
-                let itemStatus = '';
-                
-                // Search for class starting with 'status-'
-                const classes = classNames.split(' ');
-                classes.forEach(className => {
-                    if (className.startsWith('status-')) {
-                        itemStatus = className.substring(7); // Remove 'status-' prefix
-                    }
-                });
-                
+                const rawStatus = statusElement.textContent || statusElement.innerText || '';
+                const itemStatus = normalizeStatus(rawStatus);
                 const itemName = nameElement.textContent.toLowerCase().trim();
 
-                // Check if matches filters
-                const statusMatches = !selectedStatus || itemStatus === selectedStatus;
+                const statusMatches = !sel || itemStatus === sel;
                 const nameMatches = !searchTerm || itemName.includes(searchTerm);
 
-                // Show or hide item
                 item.style.display = (statusMatches && nameMatches) ? '' : 'none';
             } catch (e) {
                 console.error('Error filtering item:', e);
@@ -307,15 +375,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Attach event listeners
-    statusFilter.addEventListener('change', filterTournaments);
-    statusFilter.addEventListener('input', filterTournaments);
-    searchInput.addEventListener('keyup', filterTournaments);
-    searchInput.addEventListener('input', filterTournaments);
-    searchInput.addEventListener('keydown', filterTournaments);
-    
-    // Initial filter on page load
-    setTimeout(filterTournaments, 0);
+    // Buttons behaviour
+    statusButtons.forEach(btn => {
+        btn.addEventListener('click', function(){
+            const s = btn.dataset.status || '';
+            const already = btn.classList.contains('active');
+            // reset active on all
+            statusButtons.forEach(b => b.classList.remove('active'));
+            if(!already){
+                btn.classList.add('active');
+                filterTournaments(s);
+            } else {
+                // show all
+                document.querySelectorAll('.status-filter-btn')[0].classList.add('active'); // Tous
+                filterTournaments('');
+            }
+        });
+    });
+
+    // Clicking on a status span filters by that status
+    document.querySelectorAll('.status').forEach(span => {
+        span.style.cursor = 'pointer';
+        span.addEventListener('click', function(){
+            const s = normalizeStatus(span.textContent || span.innerText || '');
+            // activate matching button
+            statusButtons.forEach(b => b.classList.toggle('active', (b.dataset.status||'') === s));
+            filterTournaments(s);
+        });
+    });
+
+    // Search input listeners
+    searchInput.addEventListener('input', function(){
+        // find current active status
+        const active = document.querySelector('.status-filter-btn.active');
+        const s = active ? (active.dataset.status || '') : '';
+        filterTournaments(s);
+    });
+
+    // initial
+    filterTournaments('');
 });
 </script>
 {% endblock %}

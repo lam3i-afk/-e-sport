@@ -115,8 +115,8 @@
 <form method="post" class="admin-form" novalidate>
     <div class="form-grid">
         <div class="form-group">
-            <label for="match_game_equipe1" class="form-label">Team 1</label>
-            {{ form_widget(form.equipe1, {'full_name': 'match_game[equipe1]'}) }}
+            <label for="match_game1_equipe1" class="form-label">Team 1</label>
+            {{ form_widget(form.equipe1) }}
             {% if form.equipe1.vars.errors %}
                 <div class="invalid-feedback d-block">
                     {% for error in form.equipe1.vars.errors %}
@@ -127,8 +127,8 @@
         </div>
 
         <div class="form-group">
-            <label for="match_game_equipe2" class="form-label">Team 2</label>
-            {{ form_widget(form.equipe2, {'full_name': 'match_game[equipe2]'}) }}
+            <label for="match_game1_equipe2" class="form-label">Team 2</label>
+            {{ form_widget(form.equipe2) }}
             {% if form.equipe2.vars.errors %}
                 <div class="invalid-feedback d-block">
                     {% for error in form.equipe2.vars.errors %}

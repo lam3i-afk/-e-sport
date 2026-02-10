@@ -386,7 +386,8 @@ function closeModal(id){
     <div class="teams-grid">
 
         {% for equipe in equipes %}
-            {% include 'equipe/card.html.twig' with { equipe: equipe } %}
+            {% set is_member = user_team_ids is defined and equipe.id in user_team_ids %}
+            {% include 'equipe/card.html.twig' with { equipe: equipe, is_member: is_member|default(false) } %}
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-ghost"></i></div>

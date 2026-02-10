@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Jeu;
 use App\Form\JeuType;
 use App\Repository\JeuRepository;
+use App\Repository\TournoiRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,10 +44,16 @@ final class JeuController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_jeu_show', methods: ['GET'])]
-    public function show(Jeu $jeu): Response
+    public function show(Jeu $jeu, TournoiRepository $tournoiRepository): Response
     {
+        $equipesParTournoi = [];
+        foreach ($jeu->getTournois() as $t) {
+            $equipesParTournoi[$t->getId()] = $tournoiRepository->getEquipesInscrites($t);
+        }
+
         return $this->render('jeu/show.html.twig', [
             'jeu' => $jeu,
+            'equipesParTournoi' => $equipesParTournoi,
         ]);
     }
 

@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Equipe;
 use App\Entity\MatchGame;
+use App\Entity\Tournoi;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +16,32 @@ class MatchGameRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MatchGame::class);
+    }
+
+    /**
+     * @return MatchGame[]
+     */
+    public function findByTournoi(Tournoi $tournoi): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.Tournoi = :tournoi')
+            ->setParameter('tournoi', $tournoi)
+            ->orderBy('m.dateMatch', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Matchs où l'équipe est equipe1 ou equipe2 (pour suppression en cascade manuelle).
+     * @return MatchGame[]
+     */
+    public function findByEquipe(Equipe $equipe): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.equipe1 = :equipe OR m.equipe2 = :equipe')
+            ->setParameter('equipe', $equipe)
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

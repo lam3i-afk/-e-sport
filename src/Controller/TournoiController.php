@@ -19,8 +19,15 @@ final class TournoiController extends AbstractController
     #[Route(name: 'app_tournoi_index', methods: ['GET'])]
     public function index(TournoiRepository $tournoiRepository): Response
     {
+        $tournois = $tournoiRepository->findAllWithEquipes();
+        $equipesParTournoi = [];
+        foreach ($tournois as $t) {
+            $equipesParTournoi[$t->getId()] = $tournoiRepository->getEquipesInscrites($t);
+        }
+
         return $this->render('tournoi/index.html.twig', [
-            'tournois' => $tournoiRepository->findAll(),
+            'tournois' => $tournois,
+            'equipesParTournoi' => $equipesParTournoi,
         ]);
     }
 
@@ -45,7 +52,7 @@ final class TournoiController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_tournoi_show', methods: ['GET'])]
-    public function show(int $id, TournoiRepository $tournoiRepository): Response
+    public function show(int $id, Request $request, TournoiRepository $tournoiRepository, EquipeRepository $equipeRepository): Response
     {
         $tournoi = $tournoiRepository->findOneWithJeu($id);
         
@@ -53,9 +60,82 @@ final class TournoiController extends AbstractController
             throw $this->createNotFoundException('Tournament not found');
         }
 
+        $equipesInscrites = $tournoiRepository->getEquipesInscrites($tournoi);
+        $equipes = [];
+        $inscrire = false;
+
+        if ($request->query->getInt('inscrire', 0) === 1 && $this->getUser()) {
+            $equipes = $equipeRepository->findEligibleForUser($this->getUser());
+            $inscrire = !empty($equipes);
+        }
+
         return $this->render('tournoi/show.html.twig', [
             'tournoi' => $tournoi,
+            'equipesInscrites' => $equipesInscrites,
+            'equipes' => $equipes,
+            'inscrire' => $inscrire,
         ]);
+    }
+
+    #[Route('/{id}/paiement', name: 'app_tournoi_paiement', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function paiement(int $id, Request $request, TournoiRepository $tournoiRepository, EquipeRepository $equipeRepository): Response
+    {
+        $tournoi = $tournoiRepository->find($id);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi introuvable.');
+        }
+        $equipeId = $request->query->getInt('equipe_id', 0);
+        $equipe = $equipeRepository->find($equipeId);
+        $user = $this->getUser();
+        if (!$equipe || ($equipe->getOwner() !== $user && !$equipe->getMembers()->contains($user))) {
+            $this->addFlash('error', 'Équipe non valide.');
+            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+        }
+        return $this->render('tournoi/paiement.html.twig', [
+            'tournoi' => $tournoi,
+            'equipe' => $equipe,
+        ]);
+    }
+
+    #[Route('/{id}/paiement/process', name: 'app_tournoi_paiement_process', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function paiementProcess(int $id, Request $request, TournoiRepository $tournoiRepository, EquipeRepository $equipeRepository, EntityManagerInterface $entityManager): Response
+    {
+        $tournoi = $tournoiRepository->find($id);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi introuvable.');
+        }
+        if (!$this->isCsrfTokenValid('paiement_tournoi', $request->request->get('token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+        }
+        $equipeId = $request->request->getInt('equipe_id', 0);
+        $equipe = $equipeRepository->find($equipeId);
+        $user = $this->getUser();
+        if (!$equipe || ($equipe->getOwner() !== $user && !$equipe->getMembers()->contains($user))) {
+            $this->addFlash('error', 'Équipe non valide.');
+            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+        }
+        if ($tournoi->getEquipes()->contains($equipe)) {
+            $this->addFlash('warning', 'Votre équipe est déjà inscrite à ce tournoi.');
+            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+        }
+        // TODO: Intégrer Stripe/PayPal - pour l'instant on valide le paiement et on inscrit
+        $tournoi->addEquipe($equipe);
+        $entityManager->flush();
+        try {
+            $conn = $entityManager->getConnection();
+            $conn->insert('inscription_tournoi', [
+                'tournoi_id' => $tournoi->getId(),
+                'equipe_id' => $equipe->getId(),
+                'date_inscription' => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            $this->addFlash('warning', 'Inscription enregistrée (problème secondaire : ' . $e->getMessage() . ')');
+        }
+        $this->addFlash('success', 'Paiement effectué ! Inscription au tournoi réussie.');
+        return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
     }
 
     #[Route('/{id}/register', name: 'app_tournoi_register', methods: ['GET', 'POST'])]
@@ -67,13 +147,23 @@ final class TournoiController extends AbstractController
         if (!$tournoi) {
             throw $this->createNotFoundException('Tournament not found');
         }
+        
+        // Normaliser le statut pour décision côté serveur
+        $rawStatut = (string) $tournoi->getStatut();
+        $slug = strtolower($rawStatut);
+        // translit accents to ascii
+        $slug = @iconv('UTF-8', 'ASCII//TRANSLIT', $slug) ?: $slug;
+        $slug = preg_replace('/\s+/', '_', $slug);
+        $slug = preg_replace('/[^a-z0-9_]/', '', $slug);
 
-        $user = $this->getUser();
-        $equipes = $equipeRepository->findBy(['owner' => $user]);
-
-        if (empty($equipes)) {
+        // Interdire l'inscription si le tournoi est en cours ou terminé
+        if (in_array($slug, ['en_cours', 'encours', 'termine', 'terminé', 'termene', 'termine'])) {
+            $this->addFlash('warning', 'Les inscriptions sont fermées pour ce tournoi (statut : ' . $tournoi->getStatut() . ').');
             return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
         }
+
+        $user = $this->getUser();
+        $equipes = $equipeRepository->findEligibleForUser($user);
 
         if ($request->isMethod('POST')) {
             $equipeId = $request->get('equipe_id');
@@ -81,29 +171,55 @@ final class TournoiController extends AbstractController
 
             // Validate CSRF token
             if (!$this->isCsrfTokenValid('register_tournament', $token)) {
+                $this->addFlash('error', 'Token de sécurité invalide.');
                 return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
             }
 
             if (!$equipeId) {
-                return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+                $this->addFlash('error', 'Veuillez sélectionner une équipe.');
+                return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);
             }
 
             $equipe = $equipeRepository->find($equipeId);
 
-            if (!$equipe || $equipe->getOwner() !== $user) {
+            $canRegister = $equipe && ($equipe->getOwner() === $user || $equipe->getMembers()->contains($user));
+            if (!$canRegister) {
+                $this->addFlash('error', 'Équipe non valide.');
                 return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
             }
 
             if ($tournoi->getEquipes()->contains($equipe)) {
+                $this->addFlash('warning', 'Votre équipe est déjà inscrite à ce tournoi.');
                 return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
             }
 
-            $tournoi->addEquipe($equipe);
-            $entityManager->flush();
+            $fraisInscription = $tournoi->getFraisInscription();
+            if ($fraisInscription === null || (float) $fraisInscription <= 0) {
+                // Gratuit : inscription automatique sans passer par le paiement
+                $tournoi->addEquipe($equipe);
+                $entityManager->flush();
+                try {
+                    $conn = $entityManager->getConnection();
+                    $conn->insert('inscription_tournoi', [
+                        'tournoi_id' => $tournoi->getId(),
+                        'equipe_id' => $equipe->getId(),
+                        'date_inscription' => (new \DateTime())->format('Y-m-d H:i:s'),
+                    ]);
+                } catch (\Throwable $e) {
+                    $this->addFlash('warning', 'Inscription enregistrée (problème secondaire : ' . $e->getMessage() . ')');
+                }
+                $this->addFlash('success', 'Inscription au tournoi effectuée avec succès !');
+                return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+            }
 
-            return $this->redirectToRoute('app_tournoi_show', ['id' => $id]);
+            // Frais > 0 : redirection vers la page de paiement
+            return $this->redirectToRoute('app_tournoi_paiement', [
+                'id' => $id,
+                'equipe_id' => $equipe->getId(),
+            ]);
         }
 
+        // Afficher le formulaire : choisir une équipe existante ou créer une équipe
         return $this->render('tournoi/register.html.twig', [
             'tournoi' => $tournoi,
             'equipes' => $equipes,
