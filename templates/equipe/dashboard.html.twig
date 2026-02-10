@@ -10,7 +10,7 @@
             {% if team.logo %}
                 <img src="{{ asset('uploads/teams/' ~ team.logo) }}" alt="{{ team.nom }}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;">
             {% else %}
-                <div class="avatar" style="width:72px;height:72px;border-radius:8px;background:#0f172a;"></div>
+                <img src="{{ asset('img/logo.png') }}" alt="{{ team.nom }}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;">
             {% endif %}
             <div>
                 <h1>{{ team.nom }}</h1>
@@ -22,8 +22,13 @@
 
         <div class="team-actions">
             {% if membership.role == 'LEADER' %}
-                <a href="{{ path('app_equipe_invite', {id: team.id}) }}">Invite</a>
+                <a href="{{ path('app_equipe_membres', {id: team.id}) }}">Membres</a>
                 <a href="{{ path('app_equipe_edit', {id: team.id}) }}">Settings</a>
+            {% elseif membership.role == 'MEMBER' %}
+                <form method="post" action="{{ path('app_equipe_leave', {id: team.id}) }}" onsubmit="return confirm('Are you sure you want to leave this team?');" style="display:inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ team.id) }}">
+                    <button type="submit" class="btn-dashboard-action">Leave Team</button>
+                </form>
             {% endif %}
         </div>
     </section>
@@ -35,15 +40,15 @@
             <p>Members</p>
         </div>
         <div class="stat">
-            <h3>28</h3>
+            <h3>{{ totalMatches }}</h3>
             <p>Matches</p>
         </div>
         <div class="stat">
-            <h3>17</h3>
+            <h3>{{ wins }}</h3>
             <p>Wins</p>
         </div>
         <div class="stat">
-            <h3>61%</h3>
+            <h3>{{ winRate }}%</h3>
             <p>Win rate</p>
         </div>
     </section>

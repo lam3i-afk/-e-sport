@@ -1,0 +1,81 @@
+<style>
+    .admin-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-form .form-control,
+    .admin-form .form-select {
+        color: #e2e8f0;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .admin-form label {
+        color: #e2e8f0;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+    }
+</style>
+
+{{ form_start(form, {'attr': {'class': 'admin-form'}}) }}
+    <div class="form-grid">
+        <div class="form-group">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom) }}
+            {{ form_errors(form.nom) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.genre) }}
+            {{ form_widget(form.genre) }}
+            {{ form_errors(form.genre) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.plateforme) }}
+            {{ form_widget(form.plateforme) }}
+            {{ form_errors(form.plateforme) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.statut) }}
+            {{ form_widget(form.statut) }}
+            {{ form_errors(form.statut) }}
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+        </div>
+    </div>
+
+    <div class="form-btn-group">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Save Game') }}
+        </button>
+        <a href="{{ path('admin_jeu_index') }}" class="btn btn-secondary">
+            <i class="fas fa-times me-2"></i>Cancel
+        </a>
+    </div>
+{{ form_end(form) }}

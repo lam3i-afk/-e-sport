@@ -110,39 +110,132 @@
             justify-content: center;
         }
     }
+    .role-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .role-card {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .role-card input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .role-content {
+        background: rgba(30, 41, 59, 0.5);
+        border: 2px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .role-icon {
+        font-size: 2rem;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+    }
+
+    .role-name {
+        font-weight: 600;
+        color: #e2e8f0;
+        font-size: 1.1rem;
+    }
+
+    .role-desc {
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+
+    .role-card input[type="checkbox"]:checked + .role-content {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: #6366f1;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        transform: translateY(-5px);
+    }
+
+    .role-card input[type="checkbox"]:checked + .role-content .role-icon {
+        color: #6366f1;
+        transform: scale(1.1);
+    }
+
+    .role-card:hover .role-content {
+        border-color: rgba(99, 102, 241, 0.4);
+        background: rgba(30, 41, 59, 0.7);
+    }
 </style>
 
 {{ form_start(form, {'attr': {'class': 'admin-form', 'novalidate': 'novalidate'}}) }}
     <div class="form-grid">
         <div class="form-group">
-            {{ form_row(form.email, {'attr': {'class': 'form-control'}, 'label': 'Email'}) }}
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Email address'}}) }}
+            {{ form_errors(form.email) }}
         </div>
 
         <div class="form-group">
-            {{ form_row(form.nom, {'attr': {'class': 'form-control'}, 'label': 'Name'}) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_row(form.role, {'attr': {'class': 'form-control'}, 'label': 'Role'}) }}
-        </div>
-
-        <div class="form-group">
-            {{ form_row(form.roles, {'label': 'Roles'}) }}
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Full Name'}}) }}
+            {{ form_errors(form.nom) }}
         </div>
 
         {% if form.plainPassword is defined %}
         <div class="form-group">
-            {{ form_row(form.plainPassword, {'attr': {'class': 'form-control'}, 'label': 'Password'}) }}
+            {{ form_label(form.plainPassword) }}
+            {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Enter password'}}) }}
+            {{ form_errors(form.plainPassword) }}
         </div>
         {% endif %}
     </div>
 
+    <div class="form-group mt-4">
+        <label class="form-label mb-3">System Permissions & Roles</label>
+        <div class="role-grid">
+            {% for child in form.roles %}
+                <label class="role-card">
+                    {{ form_widget(child) }}
+                    <div class="role-content">
+                        <div class="role-icon">
+                            {% if child.vars.value == 'ROLE_ADMIN' %}
+                                <i class="fas fa-user-shield"></i>
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <div class="role-name">{{ child.vars.label }}</div>
+                        <div class="role-desc">
+                            {% if child.vars.value == 'ROLE_ADMIN' %}
+                                Full administrative access
+                            {% else %}
+                                Standard player account
+                            {% endif %}
+                        </div>
+                    </div>
+                </label>
+            {% endfor %}
+        </div>
+        {{ form_errors(form.roles) }}
+    </div>
+
     <div class="form-btn-group">
         <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> {{ button_label|default('Save User') }}
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Save User') }}
         </button>
         <a href="{{ path('admin_user_index') }}" class="btn btn-secondary">
-            <i class="fas fa-times"></i> Cancel
+            <i class="fas fa-times me-2"></i>Cancel
         </a>
     </div>
 

@@ -85,7 +85,8 @@
        Team
     </a>
     <div class="dropdown-menu" aria-labelledby="teamDropdown">
-        <a class="dropdown-item" href="{{ path('app_equipe_index') }}">All Teams</a>
+        <a class="dropdown-item" href="{{ path('app_equipe_index') }}">Team Hub</a>
+
         {% if app.user %}
         <a class="dropdown-item" href="{{ path('app_my_teams') }}">My Teams</a>
         {% endif %}

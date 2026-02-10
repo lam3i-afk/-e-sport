@@ -1,28 +1,170 @@
-{# {% extends 'base.html.twig' %} #}
-
-{% block title %}Log in!{% endblock %}
-
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
-        </div>
-    {% endif %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+<style>
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(40px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+body{
+    background: linear-gradient(90deg,#b8325b,#0b4fa3);
+}
+
+.main-wrapper{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.register-box{
+    width:900px;
+    background:white;
+        min-height:520px;   /* 👈 ADD THIS */
+
+    border-radius:6px;
+    display:flex;
+    overflow:hidden;
+    box-shadow:0 0 30px rgba(0,0,0,.3);
+    animation:fadeUp .8s ease;
+    transition:.4s;
+}
+
+.register-box:hover{
+    box-shadow:0 0 50px rgba(99,91,255,.5);
+}
+
+.left-img{
+    width:50%;
+    background:url('https://i.pinimg.com/1200x/10/ba/e4/10bae46603d2c9743bc32aa7220fde22.jpg') center/cover no-repeat;
+    transition:1s;
+}
+
+.register-box:hover .left-img{
+    transform:scale(1.05);
+}
+
+.right-form{
+    width:50%;
+    padding:50px;
+    animation:fadeUp 1s ease;
+}
+
+h2{
+    font-weight:600;
+    margin-bottom:30px;
+}
+
+.form-control{
+    border:none;
+    border-bottom:1px solid #aaa;
+    border-radius:0;
+    transition:.3s;
+}
+
+.form-control:focus{
+    box-shadow:none;
+    border-color:#635bff;
+    padding-left:8px;
+}
+
+.login-btn{
+    background:linear-gradient(90deg,#635bff,#a52bf9);
+    color:white;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:4px;
+    margin-top:25px;
+    transition:.4s;
+}
+
+.login-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(99,91,255,.4);
+}
+
+.register-link{
+    text-align:center;
+    margin-top:20px;
+    color:#635bff;
+    display:block;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.register-link:hover{
+    letter-spacing:1px;
+}
+
+.alert{
+    font-size:13px;
+    animation:fadeUp .6s ease;
+}
+
+</style>
+
+
+<div class="main-wrapper">
+
+<div class="register-box">
+
+    <!-- LEFT IMAGE -->
+    <div class="left-img"></div>
+
+    <!-- RIGHT FORM -->
+    <div class="right-form">
+
+        <h2>Login</h2>
+
+        <form method="post">
+
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            {% if app.user %}
+                <div class="mb-3">
+                    You are logged in as {{ app.user.userIdentifier }},
+                    <a href="{{ logout_path() }}">Logout</a>
+                </div>
+            {% endif %}
+
+            <input type="email"
+                   value="{{ last_username }}"
+                   name="email"
+                   class="form-control mt-4"
+                   placeholder="Email"
+                   required autofocus>
+                   
+
+            <input type="password"
+                   name="password"
+                   class="form-control mt-4"
+                   placeholder="Password"
+                   required>
+
+            <input type="hidden"
+                   name="_csrf_token"
+                   value="{{ csrf_token('authenticate') }}">
+
+            <button class="login-btn">Sign in</button>
+
+            <a href="{{ path('app_register') }}" class="register-link">
+                Don’t have an account? Register
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
 {% endblock %}

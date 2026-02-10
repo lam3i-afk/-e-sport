@@ -47,12 +47,23 @@ class LoginFormAthenticateurAuthenticator extends AbstractLoginFormAuthenticator
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
+        // If the authenticated user is an admin, redirect to admin dashboard
+        $user = $token->getUser();
 
-      
+        if (is_object($user)) {
+            // Prefer role check when available
+            if (method_exists($user, 'getRoles') && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+            }
 
-        //  Redirect to homepageeeeeeeeeeeeeeeeeee
+            // Fallback: check email (keeps your previous logic)
+            if (method_exists($user, 'getEmail') && $user->getEmail() === 'admin@gmail.com') {
+                return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+            }
+        }
+
+        // Default redirect to homepage
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
-        
 
     }
 

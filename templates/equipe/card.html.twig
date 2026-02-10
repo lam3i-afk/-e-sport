@@ -15,7 +15,7 @@
         {% if equipe.logo %}
             <img src="{{ asset('uploads/teams/' ~ equipe.logo) }}" alt="{{ equipe.nom }}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;">
         {% else %}
-            <i class="fas fa-gamepad"></i>
+            <img src="{{ asset('img/logo.png') }}" alt="{{ equipe.nom }}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;">
         {% endif %}
     </div>
 

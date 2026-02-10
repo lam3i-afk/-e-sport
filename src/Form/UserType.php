@@ -17,7 +17,6 @@ class UserType extends AbstractType
 
             ->add('email')
             ->add('nom')
-            ->add('role')
             ->add('roles', ChoiceType::class, [
                 'choices' => [
                     'User' => 'ROLE_USER',

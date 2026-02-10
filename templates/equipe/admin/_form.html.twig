@@ -1,0 +1,82 @@
+<style>
+    .admin-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-form .form-control,
+    .admin-form .form-select {
+        color: #e2e8f0;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .admin-form label {
+        color: #e2e8f0;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+    }
+</style>
+
+{{ form_start(form, {'attr': {'class': 'admin-form', 'enctype': 'multipart/form-data'}}) }}
+    <div class="form-grid">
+        <div class="form-group">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Team Name'}}) }}
+            {{ form_errors(form.nom) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.owner) }}
+            {{ form_widget(form.owner, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.owner) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.maxMembers) }}
+            {{ form_widget(form.maxMembers, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.maxMembers) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.logo) }}
+            {{ form_widget(form.logo, {'attr': {'class': 'form-control'}}) }}
+            <small class="text-muted">Current: {{ equipe.logo ?? 'None' }}</small>
+            {{ form_errors(form.logo) }}
+        </div>
+    </div>
+
+    <div class="form-group px-3">
+        {{ form_label(form.Tournois) }}
+        {{ form_widget(form.Tournois) }}
+        {{ form_errors(form.Tournois) }}
+    </div>
+
+    <div class="form-btn-group">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Save Team') }}
+        </button>
+        <a href="{{ path('admin_equipe_index') }}" class="btn btn-secondary">
+            <i class="fas fa-times me-2"></i>Cancel
+        </a>
+    </div>
+{{ form_end(form) }}

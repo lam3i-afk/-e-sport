@@ -51,6 +51,12 @@ class Equipe1Type extends AbstractType
                 ],
                 'attr' => ['class' => 'form-control']
             ])
+            ->add('owner', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => 'nom',
+                'label' => 'Team Owner',
+                'attr' => ['class' => 'form-select']
+            ])
         ;
     }
 

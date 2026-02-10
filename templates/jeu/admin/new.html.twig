@@ -1,0 +1,26 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Create New Game - Admin{% endblock %}
+
+{% block admin_content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title">Create New Game</h1>
+            <p class="page-subtitle">Add a new esports title to the platform</p>
+        </div>
+        <a href="{{ path('admin_jeu_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Game Information</h5>
+    </div>
+    <div class="card-body">
+        {{ include('jeu/admin/_form.html.twig', {'button_label': 'Create Game'}) }}
+    </div>
+</div>
+{% endblock %}

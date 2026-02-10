@@ -30,6 +30,7 @@
     text-align: center;
     background: linear-gradient(90deg, var(--pink), #f472b6, var(--purple));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -155,6 +156,7 @@
     font-size: 2.8rem;
     background: linear-gradient(90deg, #38bdf8, #a855f7);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
@@ -230,6 +232,7 @@
     font-size: 2.8rem;
     background: linear-gradient(90deg,#f472b6,#a855f7);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
@@ -302,6 +305,7 @@
     margin-bottom: 40px;
     background: linear-gradient(90deg,#38bdf8,#a855f7);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
@@ -406,6 +410,7 @@
     font-size: 2.8rem;
     background: linear-gradient(90deg,#38bdf8,#a855f7);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
@@ -422,12 +427,25 @@
     background: linear-gradient(90deg,#a855f7,#6366f1);
 }
 
-.team-actions a {
+.team-actions a,
+.btn-dashboard-action {
+    display: inline-block;
     margin-left: 15px;
     padding: 10px 20px;
     border-radius: 999px;
     text-decoration: none;
     background: linear-gradient(90deg,#22c55e,#16a34a);
+    color: white;
+    border: none;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.team-actions a:hover,
+.btn-dashboard-action:hover {
+    transform: scale(1.05);
     color: white;
 }
 

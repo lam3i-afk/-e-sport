@@ -19,8 +19,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at center, rgb(30 41 59 / 0.5), transparent),
-                    url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/25.svg') no-repeat center center / 5% fixed; /* Just a placeholder pattern effect if needed */
+        background: radial-gradient(circle at center, rgb(30 41 59 / 0.5), transparent);
         opacity: 0.1;
         z-index: -1;
         pointer-events: none;
@@ -180,7 +179,7 @@
     </a>
 
     <!-- Join Team -->
-    <a href="{{ path('app_equipe_not_member', {'id': app.user.id}) }}" class="action-card">
+    <a href="{{ path('app_equipe_not_member') }}" class="action-card">
         <div class="card-icon-wrapper icon-join">
             <i class="fas fa-users"></i>
         </div>

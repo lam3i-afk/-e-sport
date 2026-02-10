@@ -1,0 +1,209 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Team Details - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .team-title h1 {
+        margin: 0;
+        color: #fff;
+    }
+
+    .team-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .team-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .logo-card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: var(--radius);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .team-logo-lg {
+        width: 150px;
+        height: 150px;
+        border-radius: 12px;
+        object-fit: cover;
+        margin-bottom: 1.5rem;
+        border: 2px solid var(--primary);
+    }
+
+    .team-details {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+    }
+
+    .team-details h5 {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .member-list {
+        margin-top: 2rem;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .team-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="team-header">
+    <div class="team-title">
+        <h1 class="page-title">{{ equipe.nom }}</h1>
+        <p class="page-subtitle">Administrative View</p>
+    </div>
+    <div class="team-actions">
+        <a href="{{ path('admin_equipe_edit', {'id': equipe.id}) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i>Edit Team
+        </a>
+        <a href="{{ path('admin_equipe_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="team-content">
+    <div class="logo-card">
+        {% if equipe.logo %}
+            <img src="{{ asset('uploads/teams/' ~ equipe.logo) }}" class="team-logo-lg" alt="">
+        {% else %}
+            <div class="team-logo-lg bg-secondary d-flex align-items-center justify-content-center mx-auto">
+                <i class="fas fa-users fa-4x text-white-50"></i>
+            </div>
+        {% endif %}
+        <h3 class="mt-3">{{ equipe.nom }}</h3>
+        <p class="text-muted">ID: #{{ equipe.id }}</p>
+    </div>
+
+    <div class="team-details">
+        <h5><i class="fas fa-info-circle me-2"></i>Team Information</h5>
+        
+        <div class="detail-row">
+            <span class="detail-label">Owner</span>
+            <span class="detail-value">{{ equipe.owner.nom ?? 'N/A' }} ({{ equipe.owner.email ?? '' }})</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Capacity</span>
+            <span class="detail-value">{{ equipe.members|length }} / {{ equipe.maxMembers }}</span>
+        </div>
+
+        <div class="member-list">
+            <h5><i class="fas fa-users me-2"></i>Active Members</h5>
+            {% for member in equipe.members %}
+                <div class="member-item">
+                    <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <span class="text-white small">{{ member.nom|first|upper }}</span>
+                    </div>
+                    <div>
+                        <div class="fw-medium">{{ member.nom }}</div>
+                        <small class="text-muted">{{ member.email }}</small>
+                    </div>
+                    {% if member == equipe.owner %}
+                        <span class="badge bg-warning ms-auto">Leader</span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="text-muted">No members found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_equipe_edit', {'id': equipe.id}) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit Team
+            </a>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>Delete Team
+            </button>
+            <a href="{{ path('admin_equipe_index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Teams
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                <h5 class="modal-title" style="color: #fff;">Delete Team</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: #e2e8f0;">
+                <p>Are you sure you want to delete the team <strong>{{ equipe.nom }}</strong>?</p>
+                <p style="color: #94a3b8; font-size: 0.875rem;">This action will remove all memberships and cannot be undone.</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(148, 163, 184, 0.1);">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ path('admin_equipe_delete', {'id': equipe.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

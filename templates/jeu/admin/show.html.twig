@@ -1,0 +1,171 @@
+{% extends 'admin/dashboard.html.twig' %}
+
+{% block title %}Game Details - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+
+    .game-title h1 {
+        margin: 0;
+        color: #fff;
+    }
+
+    .game-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .game-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .game-details {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+    }
+
+    .game-details h5 {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .description-box {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        color: #cbd5e1;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="game-header">
+    <div class="game-title">
+        <h1 class="page-title">{{ jeu.nom }}</h1>
+        <p class="page-subtitle">Administrative View</p>
+    </div>
+    <div class="game-actions">
+        <a href="{{ path('admin_jeu_edit', {'id': jeu.id}) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i>Edit Game
+        </a>
+        <a href="{{ path('admin_jeu_index') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+</div>
+
+<div class="game-content">
+    <div class="game-details">
+        <h5><i class="fas fa-info-circle me-2"></i>Game Information</h5>
+        
+        <div class="detail-row">
+            <span class="detail-label">Name</span>
+            <span class="detail-value">{{ jeu.nom }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Genre</span>
+            <span class="detail-value">{{ jeu.genre }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Platform</span>
+            <span class="detail-value">{{ jeu.plateforme }}</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="detail-label">Status</span>
+            <span class="detail-value">
+                <span class="badge {% if jeu.statut == 'ACTIVE' %}bg-success{% elseif jeu.statut == 'COMING_SOON' %}bg-info{% else %}bg-secondary{% endif %}">
+                    {{ jeu.statut }}
+                </span>
+            </span>
+        </div>
+
+        <div class="mt-4">
+            <span class="detail-label">Description</span>
+            <div class="description-box">
+                {{ jeu.description|default('No description provided.')|nl2br }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_jeu_edit', {'id': jeu.id}) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit Game
+            </a>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>Delete Game
+            </button>
+            <a href="{{ path('admin_jeu_index') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Games
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(148, 163, 184, 0.1);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+                <h5 class="modal-title" style="color: #fff;">Delete Game</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: #e2e8f0;">
+                <p>Are you sure you want to delete the game <strong>{{ jeu.nom }}</strong>?</p>
+                <p style="color: #94a3b8; font-size: 0.875rem;">This action will remove the game from the system and cannot be undone.</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(148, 163, 184, 0.1);">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ path('admin_jeu_delete', {'id': jeu.id}) }}" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ jeu.id) }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
