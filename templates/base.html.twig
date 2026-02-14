@@ -133,6 +133,13 @@
         </span>
     </a>
 </li>
+<li class="nav-item">
+    {% if app.user %}
+        <a class="nav-link" href="{{ path('app_profile') }}">
+            <i class="bi bi-person-circle" style="font-size: 1.3rem;"></i>
+        </a>
+    {% endif %}
+</li>
 
 </ul>
 </div>

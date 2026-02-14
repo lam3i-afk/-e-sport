@@ -1,6 +1,5 @@
 <?php
 
-// src/Form/RegistrationFormType.php
 namespace App\Form;
 
 use App\Entity\User;
@@ -11,65 +10,55 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email', TextType::class, [
-                'label' => 'Email',
-                'attr' => ['class' => 'form-control'],
+            ->add('nom', TextType::class, [
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez entrer un email']),
+                    new Assert\NotBlank(['message' => 'Nom obligatoire']),
+                    new Assert\Length(['min' => 3, 'max' => 100, 'minMessage' => 'Minimum 3 caractères']),
                 ],
             ])
-            ->add('nom', TextType::class, [
-                'label' => 'Nom',
-                'attr' => ['class' => 'form-control'],
+            ->add('email', TextType::class, [
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez entrer votre nom']),
-                    new Length([
-                        'min' => 2,
-                        'max' => 100,
-                        'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères',
-                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères',
-                    ]),
+                    new Assert\NotBlank(['message' => 'Email obligatoire']),
+                    new Assert\Email(['message' => 'Email invalide']),
                 ],
             ])
             ->add('role', ChoiceType::class, [
-                'label' => 'Rôle',
+                'mapped' => false, // IMPORTANT! avoid mapping to non-existent $role
                 'choices' => [
-                    'USER' => 'ROLE_USER',
-                    'ADMIN' => 'ADMIN',
+                    'Utilisateur' => 'ROLE_USER',
+                    'Admin' => 'ROLE_ADMIN',
                 ],
-                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Choice(['choices' => ['ROLE_USER','ROLE_ADMIN'], 'message' => 'Rôle invalide'])
+                ],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
-                'invalid_message' => 'Les mots de passe doivent correspondre.',
-                'options' => ['attr' => ['class' => 'form-control password-field']],
-                'required' => true,
-                'first_options'  => ['label' => 'Mot de passe'],
-                'second_options' => ['label' => 'Confirmer le mot de passe'],
+                'invalid_message' => 'Les mots de passe ne correspondent pas',
+                'first_options' => ['label' => false],
+                'second_options' => ['label' => false],
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez entrer un mot de passe']),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
-                        'max' => 4096,
-                    ]),
+                    new Assert\NotBlank(['message'=>'Mot de passe obligatoire']),
+                    new Assert\Length(['min' => 8, 'minMessage' => 'Minimum 8 caractères']),
+                    new Assert\Regex([
+                        'pattern' => '/^(?=.*[A-Z])(?=.*[0-9]).+$/',
+                        'message' => 'Au moins 1 majuscule + 1 chiffre'
+                    ])
                 ],
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => User::class,
-        ]);
+        $resolver->setDefaults(['data_class' => User::class]);
     }
 }

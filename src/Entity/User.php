@@ -1,15 +1,18 @@
 <?php
 
-// src/Entity/User.php
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')] // Utilisez des backticks car "user" est un mot réservé
+#[ORM\Table(name: '`user`')]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,27 +21,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $email = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     #[ORM\Column]
     private ?string $password = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3)]
+
+
+
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50)]
-    private string $role = 'ROLE_USER'; 
+
 
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
     }
 
-    // Getters et Setters
-    public function getId(): ?int  // FIXED: Changed from ?string to ?int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -50,7 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        $this->email = trim($email);
         return $this;
     }
 
@@ -59,21 +67,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
-    public function getUsername(): string
-    {
-        return $this->getUserIdentifier();
-    }
-
+    
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        
-        // Ensure ROLE_USER is always present
-        if (!in_array('ROLE_USER', $roles)) {
-            $roles[] = 'ROLE_USER';
-        }
-        
-        return array_unique($roles);
+        return array_unique(array_merge($this->roles, ['ROLE_USER']));
     }
 
     public function setRoles(array $roles): static
@@ -93,16 +90,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSalt(): ?string
-    {
-        // Not needed when using modern hashing algorithms
-        return null;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Si vous stockez des données temporaires sensibles, effacez-les ici
-    }
+    public function eraseCredentials(): void {}
 
     public function getNom(): ?string
     {
@@ -111,18 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setNom(string $nom): static
     {
-        $this->nom = $nom;
-        return $this;
-    }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): static
-    {
-        $this->role = $role;
+        $this->nom = trim($nom);
         return $this;
     }
 }

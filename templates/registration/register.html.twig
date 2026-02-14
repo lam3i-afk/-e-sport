@@ -119,22 +119,29 @@ h2{
 
         <div class="mt-4">
             {{ form_widget(registrationForm.nom, {'attr': {'class':'form-control','placeholder':'Full Name'}}) }}
+            {{ form_errors(registrationForm.nom) }}
+
         </div>
 
         <div class="mt-4">
             {{ form_widget(registrationForm.email, {'attr': {'class':'form-control','placeholder':'Email'}}) }}
+            {{ form_errors(registrationForm.email) }}
+
         </div>
 
         <div class="mt-4">
             {{ form_widget(registrationForm.role, {'attr': {'class':'form-select'}}) }}
+                {{ form_errors(registrationForm.role) }}
         </div>
 
         <div class="mt-4">
             {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class':'form-control','placeholder':'Password'}}) }}
+                {{ form_errors(registrationForm.plainPassword.first) }}
         </div>
 
         <div class="mt-4">
             {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class':'form-control','placeholder':'Confirm Password'}}) }}
+                {{ form_errors(registrationForm.plainPassword.second) }}
         </div>
 
         <button class="register-btn">Register</button>

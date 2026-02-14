@@ -1,0 +1,125 @@
+{# templates/profile/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile | E-Sport{% endblock %}
+
+{% block body %}
+
+<style>
+body {
+    background: radial-gradient(circle at 50% 0%, #0b0c17 0%, #1a1b2e 100%);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.profile-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+}
+
+.profile-card {
+    background: #141528;
+    border: 2px solid #635bff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 700px;
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(99, 91, 255, 0.7);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 50px rgba(99, 91, 255, 0.9);
+}
+
+/* Neon Avatar */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #635bff;
+    margin: 0 auto 20px;
+    background: url('{{ asset("img/default-avatar.png") }}') center/cover no-repeat;
+    box-shadow: 0 0 20px #635bff, 0 0 40px #635bff inset;
+    animation: pulse 2s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 20px #635bff, 0 0 40px #635bff inset; }
+    100% { box-shadow: 0 0 35px #ff1c1c, 0 0 50px #ff1c1c inset; }
+}
+
+/* Neon Text */
+.profile-card h2, .profile-card h4 {
+    color: #fff;
+    text-shadow: 0 0 10px #635bff, 0 0 20px #ff1c1c;
+}
+
+.profile-card p {
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn-neon {
+    display: inline-block;
+    padding: 12px 25px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 10px;
+    margin: 10px 0;
+    width: 100%;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #635bff, #ff1c1c);
+    box-shadow: 0 0 10px #635bff, 0 0 20px #ff1c1c;
+    transition: all 0.3s ease;
+}
+
+.btn-neon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #635bff, 0 0 40px #ff1c1c;
+}
+</style>
+<section class="breadcrumb breadcrumb_bg"> <div class="container"> <div class="row justify-content-center"> <div class="col-lg-8"> <div class="breadcrumb_iner text-center"> <div class="breadcrumb_iner_item"> <h2>My Profile</h2> <p>Home <span>-</span> Profile</p> </div> </div> </div> </div> </div> </section>
+<div class="profile-wrapper">
+    <div class="profile-card">
+
+        {# Avatar #}
+        <div class="profile-avatar"></div>
+
+        {# User Name #}
+        <h2>{{ app.user.nom ?? 'No Name' }}</h2>
+
+        {# User Email #}
+        <p>{{ app.user.email ?? 'No Email' }}</p>
+
+        {# Role Badge #}
+        <span class="badge bg-success mb-3">
+            {{ app.user.roles[0]|replace({'ROLE_':''}) }}
+        </span>
+
+        <hr style="border-color: #635bff;">
+
+        {# Edit Profile Button #}
+        <a href="{{ path('app_profile_edit') }}" class="btn btn-neon mb-2">
+            Edit Profile
+        </a>
+
+        {# Logout Button #}
+        <a href="{{ path('app_logout') }}" class="btn btn-neon">
+            Logout
+        </a>
+
+    </div>
+</div>
+
+{% endblock %}
