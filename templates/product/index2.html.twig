@@ -292,6 +292,9 @@
                     {% else %}
                         <p class="text-white">No products available.</p>
                     {% endfor %}
+                    <div class="mt-4">
+    {{ knp_pagination_render(products) }}
+</div>
                 </div>
             </div>
         </div>
