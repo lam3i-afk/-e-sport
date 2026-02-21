@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\CategoryRepository;
 use Symfony\Component\Routing\Attribute\Route;
-
+use Knp\Component\Pager\PaginatorInterface;
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
@@ -27,20 +27,27 @@ final class ProductController extends AbstractController
 public function index2(
     Request $request,
     ProductRepository $productRepository,
-    CategoryRepository $categoryRepository
+    CategoryRepository $categoryRepository,
+    PaginatorInterface $paginator
 ): Response {
+
     $searchTerm = $request->query->get('search', '');
 
+    $queryBuilder = $productRepository->createQueryBuilder('p');
+
     if ($searchTerm) {
-        // Search by product name
-        $products = $productRepository->createQueryBuilder('p')
+        $queryBuilder
             ->where('p.name LIKE :term')
-            ->setParameter('term', '%'.$searchTerm.'%')
-            ->getQuery()
-            ->getResult();
-    } else {
-        $products = $productRepository->findAll();
+            ->setParameter('term', '%'.$searchTerm.'%');
     }
+
+    $query = $queryBuilder->getQuery();
+
+    $products = $paginator->paginate(
+        $query,
+        $request->query->getInt('page', 1),
+        6 // 6 produits par page
+    );
 
     return $this->render('product/index2.html.twig', [
         'products' => $products,
@@ -50,10 +57,28 @@ public function index2(
 }
 
 #[Route('/category/{id}/index2', name: 'app_product_by_category_index2', methods: ['GET'])]
-public function byCategoryIndex2(Category $category, CategoryRepository $categoryRepository): Response
-{
+public function byCategoryIndex2(
+    Category $category,
+    Request $request,
+    ProductRepository $productRepository,
+    CategoryRepository $categoryRepository,
+    PaginatorInterface $paginator
+): Response {
+
+    $queryBuilder = $productRepository->createQueryBuilder('p')
+        ->where('p.category = :category')
+        ->setParameter('category', $category);
+
+    $query = $queryBuilder->getQuery();
+
+    $products = $paginator->paginate(
+        $query,
+        $request->query->getInt('page', 1),
+        6
+    );
+
     return $this->render('product/index2.html.twig', [
-        'products' => $category->getProducts(),
+        'products' => $products,
         'categories' => $categoryRepository->findAll(),
     ]);
 }
