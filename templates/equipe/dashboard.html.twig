@@ -48,122 +48,53 @@
             Team Statistics
         </h2>
 
-        <!-- Row 1: Win Rate Ring + Performance Cards -->
-        <div class="stats-hero-row">
-            <!-- Win Rate Ring -->
-            <div class="stats-ring-card">
-                <div class="stats-ring-wrapper">
-                    <svg class="stats-ring-svg" viewBox="0 0 120 120">
-                        <circle class="stats-ring-bg" cx="60" cy="60" r="52" />
-                        <circle class="stats-ring-fill" cx="60" cy="60" r="52"
-                            stroke-dasharray="{{ (winRate / 100 * 326.73)|round(2) }} {{ 326.73 - (winRate / 100 * 326.73)|round(2) }}"
-                            stroke-dashoffset="0" />
-                    </svg>
-                    <div class="stats-ring-label">
-                        <span class="stats-ring-value">{{ winRate }}%</span>
-                        <span class="stats-ring-text">Win Rate</span>
-                    </div>
+        <!-- Performance Cards -->
+        <div class="stats-perf-grid" style="margin-bottom:24px;">
+            {% if teamRank is defined and teamRank %}
+            <div class="stats-card stats-card--rank">
+                <div class="stats-card-icon rank-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 </div>
-                <div class="stats-ring-detail">
-                    <div class="stats-ring-detail-item">
-                        <span class="srd-value win">{{ wins }}</span>
-                        <span class="srd-label">Wins</span>
-                    </div>
-                    <div class="stats-ring-detail-divider"></div>
-                    <div class="stats-ring-detail-item">
-                        <span class="srd-value loss">{{ totalMatches - wins }}</span>
-                        <span class="srd-label">Losses</span>
-                    </div>
-                    <div class="stats-ring-detail-divider"></div>
-                    <div class="stats-ring-detail-item">
-                        <span class="srd-value total">{{ totalMatches }}</span>
-                        <span class="srd-label">Played</span>
-                    </div>
+                <div class="stats-card-body">
+                    <span class="stats-card-value">#{{ teamRank.rang }}</span>
+                    <span class="stats-card-label">Global Rank</span>
                 </div>
+                <div class="stats-card-accent rank-accent"></div>
             </div>
-
-            <!-- Performance Cards -->
-            <div class="stats-perf-grid">
-                {% if teamRank is defined and teamRank %}
-                <div class="stats-card stats-card--rank">
-                    <div class="stats-card-icon rank-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    </div>
-                    <div class="stats-card-body">
-                        <span class="stats-card-value">#{{ teamRank.rang }}</span>
-                        <span class="stats-card-label">Global Rank</span>
-                    </div>
-                    <div class="stats-card-accent rank-accent"></div>
+            <div class="stats-card stats-card--ppm">
+                <div class="stats-card-icon ppm-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 </div>
-                <div class="stats-card stats-card--ppm">
-                    <div class="stats-card-icon ppm-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    </div>
-                    <div class="stats-card-body">
-                        <span class="stats-card-value">{{ teamRank.ppm }}</span>
-                        <span class="stats-card-label">Pts / Match</span>
-                    </div>
-                    <div class="stats-card-accent ppm-accent"></div>
+                <div class="stats-card-body">
+                    <span class="stats-card-value">{{ teamRank.ppm }}</span>
+                    <span class="stats-card-label">Pts / Match</span>
                 </div>
-                {% endif %}
-                <div class="stats-card stats-card--members">
-                    <div class="stats-card-icon members-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <div class="stats-card-body">
-                        <span class="stats-card-value">{{ team.members|length }}</span>
-                        <span class="stats-card-label">Members</span>
-                    </div>
-                    <div class="stats-card-accent members-accent"></div>
-                </div>
-                <div class="stats-card stats-card--matches">
-                    <div class="stats-card-icon matches-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                    </div>
-                    <div class="stats-card-body">
-                        <span class="stats-card-value">{{ totalMatches }}</span>
-                        <span class="stats-card-label">Total Matches</span>
-                    </div>
-                    <div class="stats-card-accent matches-accent"></div>
-                </div>
+                <div class="stats-card-accent ppm-accent"></div>
             </div>
-        </div>
-
-        <!-- Row 2: Goals Breakdown -->
-        <div class="stats-goals-row">
-            <div class="stats-goal-card">
-                <div class="stats-goal-icon gf-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            {% endif %}
+            <div class="stats-card stats-card--members">
+                <div class="stats-card-icon members-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 </div>
-                <span class="stats-goal-value gf-val">{{ goalsFor }}</span>
-                <span class="stats-goal-label">Goals For</span>
-                <div class="stats-goal-bar">
-                    <div class="stats-goal-fill gf-fill" style="width: {{ goalsFor + goalsAgainst > 0 ? ((goalsFor / (goalsFor + goalsAgainst)) * 100)|round : 50 }}%"></div>
+                <div class="stats-card-body">
+                    <span class="stats-card-value">{{ team.members|length }}</span>
+                    <span class="stats-card-label">Members</span>
                 </div>
+                <div class="stats-card-accent members-accent"></div>
             </div>
-            <div class="stats-goal-card">
-                <div class="stats-goal-icon ga-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div class="stats-card stats-card--matches">
+                <div class="stats-card-icon matches-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                 </div>
-                <span class="stats-goal-value ga-val">{{ goalsAgainst }}</span>
-                <span class="stats-goal-label">Goals Against</span>
-                <div class="stats-goal-bar">
-                    <div class="stats-goal-fill ga-fill" style="width: {{ goalsFor + goalsAgainst > 0 ? ((goalsAgainst / (goalsFor + goalsAgainst)) * 100)|round : 50 }}%"></div>
+                <div class="stats-card-body">
+                    <span class="stats-card-value">{{ totalMatches }}</span>
+                    <span class="stats-card-label">Total Matches</span>
                 </div>
+                <div class="stats-card-accent matches-accent"></div>
             </div>
-            <div class="stats-goal-card">
-                <div class="stats-goal-icon avg-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-                </div>
-                <span class="stats-goal-value avg-val">{{ goalAverage }}</span>
-                <span class="stats-goal-label">Goals / Match</span>
-                <div class="stats-goal-bar">
-                    <div class="stats-goal-fill avg-fill" style="width: {{ goalAverage > 0 ? min(goalAverage * 20, 100)|round : 5 }}%"></div>
-                </div>
-            </div>
-            <div class="stats-goal-card stats-goal-card--diff {{ goalDifference > 0 ? 'diff-positive' : (goalDifference < 0 ? 'diff-negative' : 'diff-neutral') }}">
-                <div class="stats-goal-icon diff-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="stats-card stats-card--diff {{ goalDifference > 0 ? 'diff-positive' : (goalDifference < 0 ? 'diff-negative' : 'diff-neutral') }}">
+                <div class="stats-card-icon diff-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         {% if goalDifference > 0 %}
                             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
                         {% elseif goalDifference < 0 %}
@@ -173,8 +104,21 @@
                         {% endif %}
                     </svg>
                 </div>
-                <span class="stats-goal-value diff-val">{{ goalDifference > 0 ? '+' : '' }}{{ goalDifference }}</span>
-                <span class="stats-goal-label">Goal Diff</span>
+                <div class="stats-card-body">
+                    <span class="stats-card-value">{{ goalDifference > 0 ? '+' : '' }}{{ goalDifference }}</span>
+                    <span class="stats-card-label">Goal Diff</span>
+                </div>
+                <div class="stats-card-accent {{ goalDifference > 0 ? 'rank-accent' : (goalDifference < 0 ? 'matches-accent' : 'members-accent') }}"></div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;height:320px;">
+                {{ render_chart(resultsChart) }}
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;height:320px;">
+                {{ render_chart(goalsChart) }}
             </div>
         </div>
     </section>

@@ -32,6 +32,9 @@
 <link href="{{ asset('css/nice-select.css') }}" rel="stylesheet">
 <link href="{{ asset('css/magnific-popup.css') }}" rel="stylesheet">
 
+{% block javascripts %}
+    {{ importmap('app') }}
+{% endblock %}
 
 </head>
 
@@ -163,7 +166,7 @@
                     <div class="row">
                         <div class="col-sm-6 col-lg-3">
                             <div class="single_footer_part">
-                                <a href="index.html" class="footer_logo_iner"> <img src="img/logo.png" alt="#"> </a>
+                                <a href="{{ path('app_home') }}" class="footer_logo_iner"> <img src="{{ asset('img/logo.png') }}" alt="#"> </a>
                                 <p>Heaven fruitful doesn't over lesser days appear creeping seasons so behold bearing
                                     days
                                     open
@@ -225,7 +228,7 @@
                         <div class="col-lg-8">
                             <div class="copyright_text">
                                 <P><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="ti-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+Copyright &copy;{{ "now"|date("Y") }} All rights reserved | This template is made with <i class="ti-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
 <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></P>
                             </div>
                         </div>

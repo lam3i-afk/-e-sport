@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Equipe;
 use App\Entity\MatchGame;
 use App\Form\MatchGame1Type;
 use App\Repository\MatchGameRepository;
+use App\Service\MatchGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -113,6 +115,41 @@ final class MatchGameController extends AbstractController
             'tournoi' => null,
             'classement' => [],
         ]);
+    }
+
+    /**
+     * Force la régénération des matchs pour un tournoi (utile en admin).
+     * Les matchs sont d'abord automatiquement générés lors de l'inscription des équipes.
+     */
+    #[Route('/generate/{tournoiId}', name: 'app_match_game_generate', methods: ['POST'])]
+    public function generateMatches(
+        int $tournoiId,
+        Request $request,
+        \App\Repository\TournoiRepository $tournoiRepository,
+        MatchGeneratorService $matchGenerator
+    ): Response {
+        if (!$this->isCsrfTokenValid('generate_matches_' . $tournoiId, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_match_game_by_tournoi', ['tournoiId' => $tournoiId]);
+        }
+
+        $tournoi = $tournoiRepository->find($tournoiId);
+        if (!$tournoi) {
+            throw $this->createNotFoundException('Tournoi introuvable.');
+        }
+
+        $nbMatchs = $matchGenerator->regenerate($tournoi);
+        if ($nbMatchs > 0) {
+            $this->addFlash('success', sprintf(
+                '%d matchs ont été régénérés pour le tournoi "%s" !',
+                $nbMatchs,
+                $tournoi->getNom()
+            ));
+        } else {
+            $this->addFlash('error', 'Pas assez d\'équipes inscrites (minimum 2).');
+        }
+
+        return $this->redirectToRoute('app_match_game_by_tournoi', ['tournoiId' => $tournoiId]);
     }
 
         #[Route("/dashboard" ,name: 'app_match_game_index2', methods: ['GET'])]

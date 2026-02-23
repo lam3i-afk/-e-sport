@@ -98,6 +98,42 @@ class TournoiRepository extends ServiceEntityRepository
     }
 
     /**
+     * Retourne les tournois "En Attente" dont la date limite d'inscription est passée
+     * et qui n'ont pas encore de matchs générés.
+     *
+     * @return Tournoi[]
+     */
+    public function findTournoisReadyForGeneration(\DateTime $now): array
+    {
+        $em = $this->getEntityManager();
+
+        // Tous les tournois en attente dont la date limite est dépassée
+        $tournois = $this->createQueryBuilder('t')
+            ->andWhere('t.statut = :statut')
+            ->andWhere('t.dateInscriptionLimite IS NOT NULL')
+            ->andWhere('t.dateInscriptionLimite <= :now')
+            ->setParameter('statut', 'En Attente')
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
+
+        // Filtrer ceux qui n'ont pas encore de matchs
+        $conn = $em->getConnection();
+        $result = [];
+        foreach ($tournois as $tournoi) {
+            $count = (int) $conn->fetchOne(
+                'SELECT COUNT(*) FROM match_game WHERE tournoi_id = :tid',
+                ['tid' => $tournoi->getId()]
+            );
+            if ($count === 0) {
+                $result[] = $tournoi;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Retourne les équipes inscrites au tournoi qui ont des places disponibles
      * et où l'utilisateur n'est pas déjà membre ou propriétaire.
      */

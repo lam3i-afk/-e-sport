@@ -18,6 +18,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
+use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Notifier\Recipient\Recipient;
+use App\Notification\JoinRequestNotification;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -334,7 +339,7 @@ final class EquipeController extends AbstractController
     }
     
     #[Route('/{id<\d+>}/dashboard', name: 'app_equipe_dashboard', methods: ['GET'])]
-    public function dashboard(int $id, EntityManagerInterface $entityManager): Response
+    public function dashboard(int $id, EntityManagerInterface $entityManager, ChartBuilderInterface $chartBuilder): Response
     {
         $equipe = $entityManager->getRepository(Equipe::class)->find($id);
 
@@ -392,9 +397,68 @@ final class EquipeController extends AbstractController
             }
         }
         
+        $draws = 0;
+        foreach ($matches as $match) {
+            $s1 = $match->getScoreTeam1() ?? 0;
+            $s2 = $match->getScoreTeam2() ?? 0;
+            if ($s1 === $s2) {
+                $draws++;
+            }
+        }
+        $losses = $totalMatches - $wins - $draws;
+
         $winRate = $totalMatches > 0 ? round(($wins / $totalMatches) * 100) : 0;
         $goalDifference = $goalsFor - $goalsAgainst;
         $goalAverage = $totalMatches > 0 ? round($goalsFor / $totalMatches, 1) : 0;
+
+        // --- CHARTS ---
+
+        // 1. Doughnut: Wins / Draws / Losses
+        $resultsChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
+        $resultsChart->setData([
+            'labels' => ['Victoires', 'Nuls', 'Défaites'],
+            'datasets' => [[
+                'data' => [$wins, $draws, $losses],
+                'backgroundColor' => ['#22c55e', '#facc15', '#ef4444'],
+                'borderColor' => 'rgba(0,0,0,0)',
+                'hoverOffset' => 8,
+            ]],
+        ]);
+        $resultsChart->setOptions([
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => ['position' => 'bottom', 'labels' => ['color' => '#cbd5e1', 'padding' => 16, 'font' => ['size' => 13]]],
+                'title' => ['display' => true, 'text' => 'Résultats des matchs', 'color' => '#f1f5f9', 'font' => ['size' => 16, 'weight' => 'bold']],
+            ],
+        ]);
+
+        // 2. Bar: Goals For / Goals Against
+        $goalsChart = $chartBuilder->createChart(Chart::TYPE_BAR);
+        $goalsChart->setData([
+            'labels' => ['Buts marqués', 'Buts encaissés'],
+            'datasets' => [[
+                'label' => 'Buts',
+                'data' => [$goalsFor, $goalsAgainst],
+                'backgroundColor' => ['rgba(99,102,241,0.7)', 'rgba(239,68,68,0.7)'],
+                'borderColor' => ['#6366f1', '#ef4444'],
+                'borderWidth' => 2,
+                'borderRadius' => 8,
+                'barPercentage' => 0.5,
+            ]],
+        ]);
+        $goalsChart->setOptions([
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'scales' => [
+                'y' => ['beginAtZero' => true, 'ticks' => ['color' => '#94a3b8', 'stepSize' => 1], 'grid' => ['color' => 'rgba(148,163,184,0.1)']],
+                'x' => ['ticks' => ['color' => '#94a3b8'], 'grid' => ['display' => false]],
+            ],
+            'plugins' => [
+                'legend' => ['display' => false],
+                'title' => ['display' => true, 'text' => 'Buts marqués vs encaissés', 'color' => '#f1f5f9', 'font' => ['size' => 16, 'weight' => 'bold']],
+            ],
+        ]);
 
         // Get team rank from global ranking
         $ranking = $this->computeGlobalRanking($entityManager);
@@ -427,11 +491,13 @@ final class EquipeController extends AbstractController
             'goalDifference' => $goalDifference,
             'teamRank' => $teamRank,
             'pendingRequests' => $pendingRequests,
+            'resultsChart' => $resultsChart,
+            'goalsChart' => $goalsChart,
         ]);
     }
 
     #[Route('/{id<\d+>}/join', name: 'app_equipe_join', methods: ['GET', 'POST'])]
-    public function join(int $id, EntityManagerInterface $entityManager): Response
+    public function join(int $id, EntityManagerInterface $entityManager, NotifierInterface $notifier, string $projectDir): Response
     {
         $equipe = $entityManager->getRepository(Equipe::class)->find($id);
         if (!$equipe) {
@@ -473,6 +539,12 @@ final class EquipeController extends AbstractController
 
         $entityManager->persist($joinRequest);
         $entityManager->flush();
+
+        // Notifier le owner de l'équipe par email
+        $owner = $equipe->getOwner();
+        $requesterName = $user->getNom() ?: $user->getUserIdentifier();
+        $notification = new JoinRequestNotification($requesterName, $equipe->getNom(), $projectDir);
+        $notifier->send($notification, new Recipient($owner->getEmail()));
 
         $this->addFlash('success', 'Votre demande a été envoyée ! En attente de l\'approbation du propriétaire.');
         return $this->redirectToRoute('app_equipe_discover');
