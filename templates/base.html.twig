@@ -266,11 +266,18 @@ Copyright &copy;{{ "now"|date("Y") }} All rights reserved | This template is mad
 <script src="{{ asset('jss/main.js') }}"></script>
 <script>
 function loadCartCount() {
-    fetch("{{ path('app_cart_data') }}")
-        .then(response => response.json())
+    fetch("{{ path('app_cart_data') }}", { credentials: 'same-origin' })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Failed to load cart data', response.status);
+                return { totalItems: 0 };
+            }
+            return response.json();
+        })
         .then(data => {
             document.getElementById("cart-count").innerText = data.totalItems;
-        });
+        })
+        .catch(err => console.error('Error loading cart data:', err));
 }
 
 document.addEventListener("DOMContentLoaded", loadCartCount);

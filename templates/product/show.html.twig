@@ -360,10 +360,13 @@ document.addEventListener('DOMContentLoaded', function() {
             button.classList.add('loading');
             
             // Send AJAX request
-            fetch('/cart/add/' + productId, {
+            const addUrl = '{{ path('app_cart_add', {'id':'__ID__'}) }}'.replace('__ID__', productId);
+            fetch(addUrl, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ quantity: quantity })
             })

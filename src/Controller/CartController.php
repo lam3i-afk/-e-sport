@@ -55,8 +55,13 @@ class CartController extends AbstractController
     #[Route('/add/{id}', name: 'app_cart_add', methods: ['POST'])]
     public function add(Product $product, Request $request): JsonResponse
     {
-        // Check if user is logged in
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // if AJAX call comes from an anonymous user we want a JSON response, not a redirect
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'You must be logged in to add items to the cart'
+            ], 401);
+        }
 
         $user = $this->getUser();
         $cart = $this->cartService->getCart($user);

@@ -403,10 +403,14 @@ document.addEventListener('DOMContentLoaded', function() {
             button.classList.add('loading');
             
             // Send AJAX request
-            fetch('/cart/add/' + productId, {
+            // build URL using Symfony router to respect base path
+            const addUrl = '{{ path('app_cart_add', {'id':'__ID__'}) }}'.replace('__ID__', productId);
+            fetch(addUrl, {
                 method: 'POST',
+                credentials: 'same-origin',      // ensure session cookie is sent
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({ quantity: 1 })
             })
