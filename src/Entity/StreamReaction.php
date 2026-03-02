@@ -27,6 +27,7 @@ class StreamReaction
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'reactions')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')] /*ajouter ce ligne pour fixe le probleme doctrine */
     private ?Stream $stream = null;
 
     public function getId(): ?int
