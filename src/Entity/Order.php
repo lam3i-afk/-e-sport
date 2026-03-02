@@ -58,8 +58,9 @@ private ?string $totalPrice = null;
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $createdAt = null;
+ #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $paidAt = null;

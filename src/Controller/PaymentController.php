@@ -30,10 +30,14 @@ class PaymentController extends AbstractController
     #[Route('/create-checkout-session', name: 'payment_create_checkout_session', methods: ['POST'])]
     public function createCheckoutSession(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+    $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        /** @var \App\Entity\User $user */
 $user = $this->getUser();
+
+if (!$user instanceof \App\Entity\User) {
+    throw $this->createAccessDeniedException();
+}
+
 $cart = $this->cartService->getCart($user);
 
         if ($cart->getItems()->count() === 0) {
@@ -137,8 +141,14 @@ $cart = $this->cartService->getCart($user);
         $this->entityManager->flush();
 
         // Clear cart
-        $cart = $this->cartService->getCart($this->getUser());
-        $this->cartService->clearCart($cart);
+       $user = $this->getUser();
+
+if (!$user instanceof \App\Entity\User) {
+    throw $this->createAccessDeniedException();
+}
+
+$cart = $this->cartService->getCart($user);
+$this->cartService->clearCart($cart);
 
         return $this->render('payment/payment_success.html.twig', ['order' => $order]);
     }

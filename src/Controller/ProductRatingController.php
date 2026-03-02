@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[IsGranted('ROLE_USER')]
 #[Route('/rating', name: 'app_rating_')]
@@ -66,25 +68,36 @@ class ProductRatingController extends AbstractController
         return $this->redirectToRoute('app_product_show', ['id' => $id]);
     }
 
-    #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(
-        int $id,
-        ProductRatingRepository $ratingRepository,
-        EntityManagerInterface $em
-    ): RedirectResponse {
+ 
 
-        /** @var \App\Entity\User $user */
-        $user = $this->getUser();
-        $rating = $ratingRepository->find($id);
+#[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
+public function delete(
+    int $id,
+    Request $request,
+    ProductRatingRepository $ratingRepository,
+    EntityManagerInterface $em,
+    CsrfTokenManagerInterface $csrfTokenManager
+): RedirectResponse {
 
-        if ($rating && $rating->getUser() === $user) {
-            $productId = $rating->getProduct()->getId();
-            $em->remove($rating);
-            $em->flush();
-            $this->addFlash('info', 'Note supprimée.');
-            return $this->redirectToRoute('app_product_show', ['id' => $productId]);
-        }
+    /** @var \App\Entity\User $user */
+    $user = $this->getUser();
+    $rating = $ratingRepository->find($id);
 
+    if (!$rating || $rating->getUser() !== $user) {
         throw $this->createAccessDeniedException();
     }
+
+    // CSRF check
+    $submittedToken = $request->request->get('_token');
+    if (!$csrfTokenManager->isTokenValid(new CsrfToken('delete_rating_'.$rating->getId(), $submittedToken))) {
+        throw $this->createAccessDeniedException('Invalid CSRF token.');
+    }
+
+    $productId = $rating->getProduct()->getId();
+    $em->remove($rating);
+    $em->flush();
+
+    $this->addFlash('info', 'Note supprimée.');
+    return $this->redirectToRoute('app_product_show', ['id' => $productId]);
+}
 }

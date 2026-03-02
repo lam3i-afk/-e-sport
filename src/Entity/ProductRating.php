@@ -31,8 +31,9 @@ class ProductRating
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $comment = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $createdAt = null;
+   #[ORM\Column(type: 'datetime_immutable')]
+private \DateTimeImmutable $createdAt;
+
 
     public function __construct()
     {

@@ -127,7 +127,12 @@ public function setCategory(?Category $category): self
 }
 // Dans src/Entity/Product.php, ajouter :
 
-#[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductRating::class, cascade: ['remove'])]
+#[ORM\OneToMany(
+    mappedBy: 'product',
+    targetEntity: ProductRating::class,
+    cascade: ['persist', 'remove'],
+    orphanRemoval: true
+)]
 private Collection $ratings;
 
 public function __construct()
@@ -151,5 +156,25 @@ public function getRatingCount(): int
 {
     return $this->ratings->count();
 }
+public function addRating(ProductRating $rating): self
+{
+    if (!$this->ratings->contains($rating)) {
+        $this->ratings->add($rating);
+        $rating->setProduct($this); 
+    }
 
+    return $this;
+}
+
+public function removeRating(ProductRating $rating): self
+{
+    if ($this->ratings->removeElement($rating)) {
+        // unset the owning side
+        if ($rating->getProduct() === $this) {
+            $rating->setProduct(null);
+        }
+    }
+
+    return $this;
+}
 }

@@ -531,16 +531,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                 onmouseout="this.style.background='#054397'">
                             {% if userRating %}Mettre à jour{% else %}Envoyer{% endif %}
                         </button>
-
+</form>
                         {% if userRating %}
-                            <form method="POST" action="{{ path('app_rating_delete', {id: userRating.id}) }}" style="margin-top:8px;">
-                                <button type="submit"
-                                        style="background:transparent; color:#ef4444; border:1px solid #ef4444; padding:8px 24px; border-radius:10px; font-weight:600; cursor:pointer; width:100%; transition:0.2s;"
-                                        onmouseover="this.style.background='rgba(239,68,68,0.05)'"
-                                        onmouseout="this.style.background='transparent'">
-                                    🗑️ Supprimer ma note
-                                </button>
-                            </form>
+                          <form method="POST" action="{{ path('app_rating_delete', {id: userRating.id}) }}" style="margin-top:8px;">
+    {# CSRF token #}
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_rating_' ~ userRating.id) }}">
+    
+    <button type="submit"
+            style="background:transparent; color:#ef4444; border:1px solid #ef4444; padding:8px 24px; border-radius:10px; font-weight:600; cursor:pointer; width:100%; transition:0.2s;"
+            onmouseover="this.style.background='rgba(239,68,68,0.05)'"
+            onmouseout="this.style.background='transparent'">
+        🗑️ Supprimer ma note
+    </button>
+</form>
                         {% endif %}
 
                     </form>
