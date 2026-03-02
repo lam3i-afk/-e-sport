@@ -243,6 +243,13 @@ final class TournoiController extends AbstractController
         $equipeId = $request->request->getInt('equipe_id', 0);
         $equipe = $equipeRepository->find($equipeId);
         $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est authentifié et du bon type
+        if (!$user instanceof \App\Entity\User) {
+            $this->addFlash('error', 'Vous devez être authentifié pour rejoindre une équipe.');
+            return $this->redirectToRoute('app_login');
+        }
+        
         if (!$equipe) {
             $this->addFlash('error', 'Équipe introuvable.');
             return $this->redirectToRoute('app_tournoi_register', ['id' => $id]);

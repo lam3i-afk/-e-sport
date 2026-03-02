@@ -69,7 +69,8 @@ class TournoiType extends AbstractType
             ->add('cagnotte', NumberType::class, [
                 'label' => 'Cagnotte (€)',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'ex: 12000']
+                'scale' => 2,
+                'attr' => ['class' => 'form-control', 'placeholder' => 'ex: 12000.00', 'step' => '0.01']
             ])
             ->add('fraisInscription', NumberType::class, [
                 'label' => 'Frais d\'inscription (€)',

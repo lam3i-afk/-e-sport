@@ -84,7 +84,7 @@
 
             <div class="info-card">
                 <h4>Prize Pool</h4>
-                <p class="amount">{{ tournoi.cagnotte|default('0') }}€</p>
+                <p class="amount">{{ tournoi.cagnotte is not null ? (tournoi.cagnotte|float) : '0' }}€</p>
                 {% if tournoi.fraisInscription %}
                     <p class="fee">Frais: {{ tournoi.fraisInscription }}€</p>
                 {% endif %}

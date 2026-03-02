@@ -10,7 +10,6 @@ class ValorantApiService
     private string $apiKey;
     private const REGION_URL = 'https://europe.api.riotgames.com';
     private const PLATFORM_URL = 'https://eu.api.riotgames.com';
-    private const HENRIK_API_URL = 'https://api.henrikdev.xyz/valorant/v3';
 
     public function __construct(HttpClientInterface $httpClient, string $riotApiKey)
     {

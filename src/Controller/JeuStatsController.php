@@ -39,7 +39,7 @@ class JeuStatsController extends AbstractController
                 
                 // Cagnotte
                 if ($tournoi->getCagnotte()) {
-                    $cagnotteTotal += $tournoi->getCagnotte();
+                    $cagnotteTotal += (float) $tournoi->getCagnotte();
                 }
                 
                 // Matchs
@@ -107,7 +107,7 @@ class JeuStatsController extends AbstractController
                 
                 // Cagnotte
                 if ($tournoi->getCagnotte()) {
-                    $cagnotteTotal += $tournoi->getCagnotte();
+                    $cagnotteTotal += (float) $tournoi->getCagnotte();
                 }
                 
                 // Matchs

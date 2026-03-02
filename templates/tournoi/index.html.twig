@@ -53,7 +53,7 @@
                         </div>
                         <div class="info-box">
                             <span class="label">Cagnotte</span>
-                            <span class="value">{{ tournoi.cagnotte is not null ? (tournoi.cagnotte ~ '€') : '0€' }}</span>
+                            <span class="value">{{ tournoi.cagnotte is not null ? (tournoi.cagnotte|float ~ '€') : '0€' }}</span>
                         </div>
                     </div>
                     <div class="tournament-right">

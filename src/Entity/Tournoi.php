@@ -53,9 +53,13 @@ class Tournoi
     #[Assert\Range(min: 1, max: 1000, notInRangeMessage: 'Le nombre de participants doit être entre {{ min }} et {{ max }}.')]
     private ?int $maxParticipants = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
+    // cagnotte stockée en tant que decimal (chaîne) pour éviter les
+    // imprécisions du type flottant. On utilise precision/scale 10,2 par
+    // exemple (max 99999999.99). Lors de l'utilisation, faire la
+    // conversion appropriée ou utiliser une librairie Money.
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
     #[Assert\GreaterThanOrEqual(value: 0, message: 'La cagnotte ne peut pas être négative.')]
-    private ?float $cagnotte = null;
+    private ?string $cagnotte = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     #[Assert\DateTime(message: 'La date limite d\'inscription doit être une date valide.')]
@@ -187,12 +191,20 @@ class Tournoi
         return $this;
     }
 
-    public function getCagnotte(): ?float
+    /**
+     * Retourne la cagnotte sous forme de chaîne décimale (ex. "1234.56").
+     */
+    public function getCagnotte(): ?string
     {
         return $this->cagnotte;
     }
 
-    public function setCagnotte(?float $cagnotte): static
+    /**
+     * Définit la cagnotte; attend une chaîne correspondant à un nombre
+     * décimal ou null. Par exemple "100.00". Utiliser des helpers
+     * / Money lib pour manipuler cette valeur.
+     */
+    public function setCagnotte(?string $cagnotte): static
     {
         $this->cagnotte = $cagnotte;
 

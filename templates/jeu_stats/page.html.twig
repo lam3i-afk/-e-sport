@@ -55,7 +55,7 @@
                     <div class="summary-content">
                         {% set totalCagnotte = 0 %}
                         {% for stat in statsParJeu %}
-                            {% set totalCagnotte = totalCagnotte + stat.cagnotteTotal %}
+                            {% set totalCagnotte = totalCagnotte + (stat.cagnotteTotal|float) %}
                         {% endfor %}
                         <h4>{{ (totalCagnotte / 1000)|number_format(0) }}K€</h4>
                         <p>Cagnotte Totale</p>
@@ -105,7 +105,7 @@
                                 </div>
                                 <div class="stat-content">
                                     <span class="stat-label">Cagnotte totale</span>
-                                    <span class="stat-value">{{ stat.cagnotteTotal|number_format(0, ',', ' ') }}€</span>
+                                    <span class="stat-value">{{ (stat.cagnotteTotal|float)|number_format(0, ',', ' ') }}€</span>
                                 </div>
                             </div>
                             <div class="stat-row">
