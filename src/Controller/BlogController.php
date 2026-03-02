@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Blog;
 use App\Entity\Comment;
 use App\Entity\Rating;
+use App\Entity\User;
 use App\Form\BlogType;
 use App\Repository\BlogRepository;
 use App\Repository\RatingRepository;
@@ -260,7 +261,7 @@ if (!$user instanceof \App\Entity\User) {
     public function apiRate(Request $request, Blog $blog, EntityManagerInterface $em, RatingRepository $ratingRepository): JsonResponse
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->json(['error' => 'You must be logged in to rate.'], 403);
         }
 
@@ -307,11 +308,12 @@ if (!$user instanceof \App\Entity\User) {
     #[Route('/api/{id}/rating-stats', name: 'app_blog_api_rating_stats', methods: ['GET'])]
     public function getRatingStats(Blog $blog): JsonResponse
     {
+        $user = $this->getUser();
         return $this->json([
             'average' => $blog->getAverageRating(),
             'count' => $blog->getRatingCount(),
             'distribution' => $blog->getRatingDistribution(),
-            'userRating' => $this->getUser() ? $blog->getUserRating($this->getUser()->getId()) : null
+            'userRating' => $user instanceof User ? $blog->getUserRating($user->getId()) : null
         ]);
     }
 

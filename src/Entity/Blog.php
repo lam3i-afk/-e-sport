@@ -22,16 +22,16 @@ class Blog
     #[Assert\NotBlank(message: "Le titre est obligatoire")]
     #[Assert\Length(min: 3, max: 255)]
     #[ORM\Column(length: 255)]
-    private ?string $title = null;
+    private string $title = '';
 
     #[Assert\NotBlank(message: "Le contenu (URL de l'image) est obligatoire")]
     #[Assert\Length(min: 10)]
     #[Assert\Url(message: "Le contenu doit être une URL valide")]
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt ;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $category = null;
@@ -63,7 +63,7 @@ private Collection $ratings;
         return $this->id; 
     }
     
-    public function getTitle(): ?string 
+    public function getTitle(): string 
     { 
         return $this->title; 
     }
@@ -74,7 +74,7 @@ private Collection $ratings;
         return $this; 
     }
     
-    public function getContent(): ?string 
+    public function getContent(): string 
     { 
         return $this->content; 
     }
@@ -85,7 +85,7 @@ private Collection $ratings;
         return $this; 
     }
     
-    public function getCreatedAt(): ?\DateTimeImmutable 
+    public function getCreatedAt(): \DateTimeImmutable 
     { 
         return $this->createdAt; 
     }

@@ -16,10 +16,10 @@ class Comment
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt ;
 
     #[ORM\ManyToOne(targetEntity: Blog::class, inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
@@ -31,9 +31,9 @@ class Comment
 
     // --- Getters & Setters ---
     public function getId(): ?int { return $this->id; }
-    public function getContent(): ?string { return $this->content; }
+    public function getContent(): string { return $this->content; }
     public function setContent(string $content): static { $this->content = $content; return $this; }
-    public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
     public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
     public function getBlog(): ?Blog { return $this->blog; }
     public function setBlog(?Blog $blog): static { $this->blog = $blog; return $this; }
